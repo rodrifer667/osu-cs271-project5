@@ -10,12 +10,13 @@ TITLE Program Template     (template.asm)
 INCLUDE Irvine32.inc
 
 ; (insert macro definitions here)
+ROW_LENGTH = 20
 
 ; (insert constant definitions here)
 
 .data
 
-testArray			DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 
+testArray			DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
 testLengthArray     DWORD       LENGTHOF testArray  
 rowIndex			DWORD		?	
 
@@ -23,6 +24,8 @@ rowIndex			DWORD		?
 rowLength			DWORD		20
 numberRows			DWORD		?
 space				DWORD		' ', 0
+inputArrayOFFSET	DWORD		?
+currentRowLength	DWORD		?
 
 .code
 main PROC
@@ -50,9 +53,8 @@ main ENDP
 
 testProc PROC	
 
+	PUSH	testLengthArray	
 	PUSH	OFFSET testArray
-	PUSH	testLengthArray
-
 	call	displayArray
 RET
 testPROC ENDP
@@ -75,32 +77,31 @@ displayArray PROC
 	MOV		EBP, ESP
 
 _loadArray:		
-	MOV		EDI, [EBP+12]				; EDI = LENGTHOF inputArray
-	MOV		ESI, [EBP+16]				; [ESI] = inputArray[0] 
+	MOV		ESI, [EBP+12]				; [ESI] = inputArray
+	MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
 
-_calculateRows:	
-	MOV		EAX, EDI
-	MOV		EDX, 0
-	MOV		EBX, rowLength 
-	DIV		EBX						
-	MOV		numberRows, EDX
 
-	MOV		ECX, numberRows
-_printRow:
-
-	PUSH	ECX	
-	MOV		ECX, rowLength 
+; for(i=LENGTHOF inputArray; i > 0; i --) {
+	MOV		ECX, EDI
 _printElement:
 	MOV		EAX, [ESI]
-	call	WriteDec
-	; print " "
+	call	WriteDec	
+	; print(' ')
 	MOV		EDX, OFFSET space
-	call	WriteString	
-	ADD		ESI, 4								; [ESI] = inputArray.next()
-	LOOP	_printElement	
-	POP		ECX 
+	call	WriteString					
+	ADD		ESI, 4
+	INC		currentRowLength	
+_indentConditionally:	
+	; if currentRowLengthl < rowLength: JMP printElement 
+	; else: CrLf
+	MOV		EBX, currentRowLength 
+	CMP		EBX, ROW_LENGTH 
+	JNE		_continue	
 	call	CrlF
-	LOOP	_printRow
+
+_continue:
+	LOOP	_printElement
+	
 	POP		EBP
 	POP		ESP
 	

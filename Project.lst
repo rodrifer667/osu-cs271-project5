@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/20/23 20:38:32
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -31,12 +31,13 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
 			      C 
 
 				; (insert macro definitions here)
+ = 00000014			ROW_LENGTH = 20
 
 				; (insert constant definitions here)
 
  00000000			.data
 
- 00000000 00000064		testArray			DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 
+ 00000000 00000064		testArray			DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
 	   000000C8
 	   00000064
 	   0000001E
@@ -63,14 +64,30 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
 	   00000005
 	   00000005
 	   00000005
- 0000006C 0000001B		testLengthArray     DWORD       LENGTHOF testArray  
- 00000070 00000000		rowIndex			DWORD		?	
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+	   00000003
+ 000000A4 00000029		testLengthArray     DWORD       LENGTHOF testArray  
+ 000000A8 00000000		rowIndex			DWORD		?	
 
 				; displayArray
- 00000074 00000014		rowLength			DWORD		20
- 00000078 00000000		numberRows			DWORD		?
- 0000007C 00000020		space				DWORD		' ', 0
+ 000000AC 00000014		rowLength			DWORD		20
+ 000000B0 00000000		numberRows			DWORD		?
+ 000000B4 00000020		space				DWORD		' ', 0
 	   00000000
+ 000000BC 00000000		inputArrayOFFSET	DWORD		?
+ 000000C0 00000000		currentRowLength	DWORD		?
 
  00000000			.code
  00000000			main PROC
@@ -100,9 +117,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
 
  0000000C			testProc PROC	
 
- 0000000C  68 00000000 R		PUSH	OFFSET testArray
- 00000011  FF 35 0000006C R		PUSH	testLengthArray
-
+ 0000000C  FF 35 000000A4 R		PUSH	testLengthArray	
+ 00000012  68 00000000 R		PUSH	OFFSET testArray
  00000017  E8 00000001			call	displayArray
  0000001C  C3			RET
  0000001D			testPROC ENDP
@@ -125,40 +141,39 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
  0000001F  8B EC			MOV		EBP, ESP
 
  00000021			_loadArray:		
- 00000021  8B 7D 0C			MOV		EDI, [EBP+12]				; EDI = LENGTHOF inputArray
- 00000024  8B 75 10			MOV		ESI, [EBP+16]				; [ESI] = inputArray[0] 
+ 00000021  8B 75 0C			MOV		ESI, [EBP+12]				; [ESI] = inputArray
+ 00000024  8B 7D 10			MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
 
- 00000027			_calculateRows:	
- 00000027  8B C7			MOV		EAX, EDI
- 00000029  BA 00000000			MOV		EDX, 0
- 0000002E  8B 1D 00000074 R		MOV		EBX, rowLength 
- 00000034  F7 F3			DIV		EBX						
- 00000036  89 15 00000078 R		MOV		numberRows, EDX
 
- 0000003C  8B 0D 00000078 R		MOV		ECX, numberRows
- 00000042			_printRow:
+				; for(i=LENGTHOF inputArray; i > 0; i --) {
+ 00000027  8B CF			MOV		ECX, EDI
+ 00000029			_printElement:
+ 00000029  8B 06			MOV		EAX, [ESI]
+ 0000002B  E8 00000000 E		call	WriteDec	
+					; print(' ')
+ 00000030  BA 000000B4 R		MOV		EDX, OFFSET space
+ 00000035  E8 00000000 E		call	WriteString					
+ 0000003A  83 C6 04			ADD		ESI, 4
+ 0000003D  FF 05 000000C0 R		INC		currentRowLength	
+ 00000043			_indentConditionally:	
+					; if currentRowLengthl < rowLength: JMP printElement 
+					; else: CrLf
+ 00000043  8B 1D 000000C0 R		MOV		EBX, currentRowLength 
+ 00000049  83 FB 14			CMP		EBX, ROW_LENGTH 
+ 0000004C  75 05			JNE		_continue	
+ 0000004E  E8 00000000 E		call	CrlF
 
- 00000042  51				PUSH	ECX	
- 00000043  8B 0D 00000074 R		MOV		ECX, rowLength 
- 00000049			_printElement:
- 00000049  8B 06			MOV		EAX, [ESI]
- 0000004B  E8 00000000 E		call	WriteDec
-					; print " "
- 00000050  BA 0000007C R		MOV		EDX, OFFSET space
- 00000055  E8 00000000 E		call	WriteString	
- 0000005A  83 C6 04			ADD		ESI, 4								; [ESI] = inputArray.next()
- 0000005D  E2 EA			LOOP	_printElement	
- 0000005F  59				POP		ECX 
- 00000060  E8 00000000 E		call	CrlF
- 00000065  E2 DB			LOOP	_printRow
- 00000067  5D				POP		EBP
- 00000068  5C				POP		ESP
+ 00000053			_continue:
+ 00000053  E2 D4			LOOP	_printElement
 					
- 00000069  C2 0008		RET		8
- 0000006C			displayArray ENDP
+ 00000055  5D				POP		EBP
+ 00000056  5C				POP		ESP
+					
+ 00000057  C2 0008		RET		8
+ 0000005A			displayArray ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/19/23 18:13:07
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/20/23 20:38:32
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -252,8 +267,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000084 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000006C Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000C4 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000005A Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -360,11 +375,11 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000004F Public STDCALL
+displayArray . . . . . . . . . .	P Near	 0000001D _TEXT	Length= 0000003D Public STDCALL
   _loadArray . . . . . . . . . .	L Near	 00000021 _TEXT	
-  _calculateRows . . . . . . . .	L Near	 00000027 _TEXT	
-  _printRow  . . . . . . . . . .	L Near	 00000042 _TEXT	
-  _printElement  . . . . . . . .	L Near	 00000049 _TEXT	
+  _printElement  . . . . . . . .	L Near	 00000029 _TEXT	
+  _indentConditionally . . . . .	L Near	 00000043 _TEXT	
+  _continue  . . . . . . . . . .	L Near	 00000053 _TEXT	
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000000C Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -492,6 +507,7 @@ OPEN_EXISTING  . . . . . . . . .	Number	 00000003h
 PeekConsoleInput . . . . . . . .	Text   	 PeekConsoleInputA
 RIGHT_ALT_PRESSED  . . . . . . .	Number	 00000001h   
 RIGHT_CTRL_PRESSED . . . . . . .	Number	 00000004h   
+ROW_LENGTH . . . . . . . . . . .	Number	 00000014h   
 ReadConsoleInput . . . . . . . .	Text   	 ReadConsoleInputA
 ReadConsole  . . . . . . . . . .	Text   	 ReadConsoleA
 SCROLLLOCK_ON  . . . . . . . . .	Number	 00000040h   
@@ -588,10 +604,12 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+currentRowLength . . . . . . . .	DWord	 000000C0 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
+inputArrayOFFSET . . . . . . . .	DWord	 000000BC _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -599,13 +617,13 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-numberRows . . . . . . . . . . .	DWord	 00000078 _DATA	
+numberRows . . . . . . . . . . .	DWord	 000000B0 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-rowIndex . . . . . . . . . . . .	DWord	 00000070 _DATA	
-rowLength  . . . . . . . . . . .	DWord	 00000074 _DATA	
-space  . . . . . . . . . . . . .	DWord	 0000007C _DATA	
+rowIndex . . . . . . . . . . . .	DWord	 000000A8 _DATA	
+rowLength  . . . . . . . . . . .	DWord	 000000AC _DATA	
+space  . . . . . . . . . . . . .	DWord	 000000B4 _DATA	
 testArray  . . . . . . . . . . .	DWord	 00000000 _DATA	
-testLengthArray  . . . . . . . .	DWord	 0000006C _DATA	
+testLengthArray  . . . . . . . .	DWord	 000000A4 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
