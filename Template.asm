@@ -12,6 +12,11 @@ INCLUDE Irvine32.inc
 ; (insert macro definitions here)
 ROW_LENGTH = 20
 
+; fillArray PROC
+LO = 20
+HI = 30
+ARRAYSIZE = 200
+
 ; (insert constant definitions here)
 
 .data
@@ -19,6 +24,7 @@ ROW_LENGTH = 20
 testArray			DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
 testLengthArray     DWORD       LENGTHOF testArray  
 rowIndex			DWORD		?	
+
 
 ; displayArray
 rowLength			DWORD		20
@@ -30,7 +36,8 @@ currentRowLength	DWORD		?
 .code
 main PROC
 
-call testProc
+	call	Randomize
+	call	testProc
 
 
 	Invoke ExitProcess,0	; exit to operating system
@@ -53,11 +60,41 @@ main ENDP
 
 testProc PROC	
 
-	PUSH	testLengthArray	
-	PUSH	OFFSET testArray
-	call	displayArray
+	call	fillArray
 RET
 testPROC ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: fillArray		
+;
+; Description: fills the array with random elements between the two specified bounds
+;
+; Preconditions: LO, HI, and ARRAY_SIZE are declared in the data segment
+; array address is declared in .data, and arrayAddress OFFSET is pushed to the PROC
+;
+; Postconditions: EAX is modified; new array holds values
+;
+; Returns:
+;
+; ---------------------------------------------------------------------------------
+
+fillArray PROC	
+
+; --------------------------
+; get randomNumber betweenm [LO, HI]
+; --------------------------
+_getRandomNumber:
+	MOV		EAX, HI
+	INC		EAX
+	call	RandomRange
+	; if randomNumber < LO: JMP _getRandomNumber
+	CMP		EAX, LO	
+	JB		_getRandomNumber			
+
+call	WriteDec
+
+RET
+fillArray ENDP
 
 ; ---------------------------------------------------------------------------------
 ; Name: procedureName
@@ -66,9 +103,9 @@ testPROC ENDP
 ;
 ; Preconditions: array OFFSET and array length are pushed to stack, respectively.
 ;
-; Postconditions:
+; Postconditions: NA	
 ;
-; Returns:
+; Returns: NA
 ;
 ; ---------------------------------------------------------------------------------
 displayArray PROC
