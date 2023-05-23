@@ -35,7 +35,7 @@ currentRowLength		DWORD		?
 
 ; fillArray
 randomElements			DWORD		ARRAYSIZE DUP(?)
-randomElementsIndex	DWORD		?
+randomElementsIndex		DWORD		?
 	
 .code
 main PROC
@@ -67,6 +67,7 @@ testProc PROC
 	call	fillArray
 	PUSH	200
  	PUSH	OFFSET randomElements
+
 	call	displayArray
 RET
 testPROC ENDP
@@ -87,9 +88,7 @@ testPROC ENDP
 
 fillArray PROC	
 
-	MOV		EBX, OFFSET randomElements
-	MOV		randomElementsIndex, EBX 
-
+	MOV		ESI, OFFSET randomElements			; ESI = index of randomElements
 	MOV		ECX, ARRAYSIZE	
 _appendElements:
 ; --------------------------
@@ -108,11 +107,10 @@ _getRandomNumber:
 ; add element to randomElements Array 
 ; --------------------------
 _addElementToArray:	
-	MOV		[randomElementsIndex], EAX
-	ADD		randomElementsIndex, 4	
-	MOV		EAX, randomElementsIndex
+	MOV		[ESI], EAX							; randomElements[ESI] = randomNumebr
+	ADD		ESI, 4
 	LOOP	_appendElements
-	
+
 RET
 fillArray ENDP
 
@@ -155,6 +153,13 @@ _indentConditionally:
 	CMP		EBX, ROW_LENGTH 
 	JNE		_continue	
 	call	CrlF
+; --------------------------
+; reset currentRowLength
+; --------------------------
+	PUSH	EAX
+	MOV		EAX, 0
+	MOV		currentRowLength, EAX
+	POP		EAX
 
 _continue:
 	LOOP	_printElement

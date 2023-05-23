@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/22/23 22:00:23
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -99,7 +99,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
  000000C4  000000C8 [		randomElements			DWORD		ARRAYSIZE DUP(?)
 	    00000000
 	   ]
- 000003E4 00000000		randomElementsIndex	DWORD		?
+ 000003E4 00000000		randomElementsIndex		DWORD		?
 					
  00000000			.code
  00000000			main PROC
@@ -133,7 +133,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
  00000011  E8 00000010			call	fillArray
  00000016  68 000000C8			PUSH	200
  0000001B  68 000000C4 R	 	PUSH	OFFSET randomElements
- 00000020  E8 00000035			call	displayArray
+
+ 00000020  E8 00000023			call	displayArray
  00000025  C3			RET
  00000026			testPROC ENDP
 
@@ -153,35 +154,31 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
 
  00000026			fillArray PROC	
 
- 00000026  BB 000000C4 R		MOV		EBX, OFFSET randomElements
- 0000002B  89 1D 000003E4 R		MOV		randomElementsIndex, EBX 
-
- 00000031  B9 000000C8			MOV		ECX, ARRAYSIZE	
- 00000036			_appendElements:
+ 00000026  BE 000000C4 R		MOV		ESI, OFFSET randomElements			; ESI = index of randomElements
+ 0000002B  B9 000000C8			MOV		ECX, ARRAYSIZE	
+ 00000030			_appendElements:
 				; --------------------------
 				; get randomNumber betweenm [LO, HI]
 				; EAX = randomeNumber
 				; --------------------------
- 00000036			_getRandomNumber:
- 00000036  B8 0000001E			MOV		EAX, HI
- 0000003B  40				INC		EAX
- 0000003C  E8 00000000 E		call	RandomRange
+ 00000030			_getRandomNumber:
+ 00000030  B8 0000001E			MOV		EAX, HI
+ 00000035  40				INC		EAX
+ 00000036  E8 00000000 E		call	RandomRange
 					; if randomNumber < LO: JMP _getRandomNumber
- 00000041  83 F8 14			CMP		EAX, LO	
- 00000044  72 F0			JB		_getRandomNumber					; EAX = randomNumber
+ 0000003B  83 F8 14			CMP		EAX, LO	
+ 0000003E  72 F0			JB		_getRandomNumber					; EAX = randomNumber
 
 				; --------------------------
 				; add element to randomElements Array 
 				; --------------------------
- 00000046			_addElementToArray:	
- 00000046  A3 000003E4 R		MOV		[randomElementsIndex], EAX
- 0000004B  83 05 000003E4 R		ADD		randomElementsIndex, 4	
-	   04
- 00000052  A1 000003E4 R		MOV		EAX, randomElementsIndex
- 00000057  E2 DD			LOOP	_appendElements
-					
- 00000059  C3			RET
- 0000005A			fillArray ENDP
+ 00000040			_addElementToArray:	
+ 00000040  89 06			MOV		[ESI], EAX							; randomElements[ESI] = randomNumebr
+ 00000042  83 C6 04			ADD		ESI, 4
+ 00000045  E2 E9			LOOP	_appendElements
+
+ 00000047  C3			RET
+ 00000048			fillArray ENDP
 
 				; ---------------------------------------------------------------------------------
 				; Name: procedureName
@@ -195,45 +192,52 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
 				; Returns: NA
 				;
 				; ---------------------------------------------------------------------------------
- 0000005A			displayArray PROC
- 0000005A  54				PUSH	ESP
- 0000005B  55				PUSH	EBP	
- 0000005C  8B EC			MOV		EBP, ESP
+ 00000048			displayArray PROC
+ 00000048  54				PUSH	ESP
+ 00000049  55				PUSH	EBP	
+ 0000004A  8B EC			MOV		EBP, ESP
 
- 0000005E			_loadArray:		
- 0000005E  8B 75 0C			MOV		ESI, [EBP+12]				; [ESI] = inputArray
- 00000061  8B 7D 10			MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
+ 0000004C			_loadArray:		
+ 0000004C  8B 75 0C			MOV		ESI, [EBP+12]				; [ESI] = inputArray
+ 0000004F  8B 7D 10			MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
 
 
 				; for(i=LENGTHOF inputArray; i > 0; i --) {
- 00000064  8B CF			MOV		ECX, EDI
- 00000066			_printElement:
- 00000066  8B 06			MOV		EAX, [ESI]
- 00000068  E8 00000000 E		call	WriteDec	
+ 00000052  8B CF			MOV		ECX, EDI
+ 00000054			_printElement:
+ 00000054  8B 06			MOV		EAX, [ESI]
+ 00000056  E8 00000000 E		call	WriteDec	
 					; print(' ')
- 0000006D  BA 000000B4 R		MOV		EDX, OFFSET space
- 00000072  E8 00000000 E		call	WriteString					
- 00000077  83 C6 04			ADD		ESI, 4
- 0000007A  FF 05 000000C0 R		INC		currentRowLength	
- 00000080			_indentConditionally:	
+ 0000005B  BA 000000B4 R		MOV		EDX, OFFSET space
+ 00000060  E8 00000000 E		call	WriteString					
+ 00000065  83 C6 04			ADD		ESI, 4
+ 00000068  FF 05 000000C0 R		INC		currentRowLength	
+ 0000006E			_indentConditionally:	
 					; if currentRowLengthl < rowLength: JMP printElement 
 					; else: CrLf
- 00000080  8B 1D 000000C0 R		MOV		EBX, currentRowLength 
- 00000086  83 FB 14			CMP		EBX, ROW_LENGTH 
- 00000089  75 05			JNE		_continue	
- 0000008B  E8 00000000 E		call	CrlF
+ 0000006E  8B 1D 000000C0 R		MOV		EBX, currentRowLength 
+ 00000074  83 FB 14			CMP		EBX, ROW_LENGTH 
+ 00000077  75 11			JNE		_continue	
+ 00000079  E8 00000000 E		call	CrlF
+				; --------------------------
+				; reset currentRowLength
+				; --------------------------
+ 0000007E  50				PUSH	EAX
+ 0000007F  B8 00000000			MOV		EAX, 0
+ 00000084  A3 000000C0 R		MOV		currentRowLength, EAX
+ 00000089  58				POP		EAX
 
- 00000090			_continue:
- 00000090  E2 D4			LOOP	_printElement
+ 0000008A			_continue:
+ 0000008A  E2 C8			LOOP	_printElement
 					
- 00000092  5D				POP		EBP
- 00000093  5C				POP		ESP
+ 0000008C  5D				POP		EBP
+ 0000008D  5C				POP		ESP
 					
- 00000094  C2 0008		RET		8
- 00000097			displayArray ENDP
+ 0000008E  C2 0008		RET		8
+ 00000091			displayArray ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/21/23 20:41:03
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/22/23 22:00:23
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -328,7 +332,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000003E8 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000097 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000091 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -435,15 +439,15 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 0000005A _TEXT	Length= 0000003D Public STDCALL
-  _loadArray . . . . . . . . . .	L Near	 0000005E _TEXT	
-  _printElement  . . . . . . . .	L Near	 00000066 _TEXT	
-  _indentConditionally . . . . .	L Near	 00000080 _TEXT	
-  _continue  . . . . . . . . . .	L Near	 00000090 _TEXT	
-fillArray  . . . . . . . . . . .	P Near	 00000026 _TEXT	Length= 00000034 Public STDCALL
-  _appendElements  . . . . . . .	L Near	 00000036 _TEXT	
-  _getRandomNumber . . . . . . .	L Near	 00000036 _TEXT	
-  _addElementToArray . . . . . .	L Near	 00000046 _TEXT	
+displayArray . . . . . . . . . .	P Near	 00000048 _TEXT	Length= 00000049 Public STDCALL
+  _loadArray . . . . . . . . . .	L Near	 0000004C _TEXT	
+  _printElement  . . . . . . . .	L Near	 00000054 _TEXT	
+  _indentConditionally . . . . .	L Near	 0000006E _TEXT	
+  _continue  . . . . . . . . . .	L Near	 0000008A _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 00000026 _TEXT	Length= 00000022 Public STDCALL
+  _appendElements  . . . . . . .	L Near	 00000030 _TEXT	
+  _getRandomNumber . . . . . . .	L Near	 00000030 _TEXT	
+  _addElementToArray . . . . . .	L Near	 00000040 _TEXT	
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000011 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
