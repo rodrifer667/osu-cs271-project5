@@ -191,23 +191,19 @@ exchangeElements PROC
 
 	; tempValue = [indexOne]
 
-_useTemptToSwitchElements:
+_useTemptsToSwitchElements:
+; [indexOne], [indexTwo] = [IndexTwo], [indexOne]
 	MOV		EAX, [EDI]
-
 	MOV		EBX, [ESI]
-	MOV		tempValue, EBX
-	
 	MOV		[ESI], EAX 
-	MOV		EAX, tempValue 
+	MOV		EAX, EBX 
 	MOV		[EDI], EAX
 
 	MOV		EAX, [ESI]
 	call	WriteDec
-	call	CrLf
 
 	MOV		EAX, [EDI]
 	call	WriteDec
-	
 	
 	POP		EBP
 	POP		ESP

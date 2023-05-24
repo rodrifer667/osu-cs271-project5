@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/23/23 22:21:22
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/23/23 22:26:10
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -256,31 +256,27 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/23/23 22:21:22
 
 					; tempValue = [indexOne]
 
- 0000009A			_useTemptToSwitchElements:
+ 0000009A			_useTemptsToSwitchElements:
+				; [indexOne], [indexTwo] = [IndexTwo], [indexOne]
  0000009A  8B 07			MOV		EAX, [EDI]
-
  0000009C  8B 1E			MOV		EBX, [ESI]
- 0000009E  89 1D 000003E8 R		MOV		tempValue, EBX
-					
- 000000A4  89 06			MOV		[ESI], EAX 
- 000000A6  A1 000003E8 R		MOV		EAX, tempValue 
- 000000AB  89 07			MOV		[EDI], EAX
+ 0000009E  89 06			MOV		[ESI], EAX 
+ 000000A0  8B C3			MOV		EAX, EBX 
+ 000000A2  89 07			MOV		[EDI], EAX
 
- 000000AD  8B 06			MOV		EAX, [ESI]
- 000000AF  E8 00000000 E		call	WriteDec
- 000000B4  E8 00000000 E		call	CrLf
+ 000000A4  8B 06			MOV		EAX, [ESI]
+ 000000A6  E8 00000000 E		call	WriteDec
 
- 000000B9  8B 07			MOV		EAX, [EDI]
- 000000BB  E8 00000000 E		call	WriteDec
+ 000000AB  8B 07			MOV		EAX, [EDI]
+ 000000AD  E8 00000000 E		call	WriteDec
 					
-					
- 000000C0  5D				POP		EBP
- 000000C1  5C				POP		ESP
- 000000C2  C2 0008		RET	8
- 000000C5			exchangeElements ENDP
+ 000000B2  5D				POP		EBP
+ 000000B3  5C				POP		ESP
+ 000000B4  C2 0008		RET	8
+ 000000B7			exchangeElements ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/23/23 22:21:22
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/23/23 22:26:10
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -375,7 +371,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000003EC Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000C5 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000B7 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -487,8 +483,8 @@ displayArray . . . . . . . . . .	P Near	 00000047 _TEXT	Length= 00000049 Public 
   _printElement  . . . . . . . .	L Near	 00000053 _TEXT	
   _indentConditionally . . . . .	L Near	 0000006D _TEXT	
   _continue  . . . . . . . . . .	L Near	 00000089 _TEXT	
-exchangeElements . . . . . . . .	P Near	 00000090 _TEXT	Length= 00000035 Public STDCALL
-  _useTemptToSwitchElements  . .	L Near	 0000009A _TEXT	
+exchangeElements . . . . . . . .	P Near	 00000090 _TEXT	Length= 00000027 Public STDCALL
+  _useTemptsToSwitchElements . .	L Near	 0000009A _TEXT	
 fillArray  . . . . . . . . . . .	P Near	 00000025 _TEXT	Length= 00000022 Public STDCALL
   _appendElements  . . . . . . .	L Near	 0000002F _TEXT	
   _getRandomNumber . . . . . . .	L Near	 0000002F _TEXT	
