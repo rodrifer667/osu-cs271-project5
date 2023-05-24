@@ -21,7 +21,7 @@ ARRAYSIZE = 200
 
 .data
 
-testArray				DWORD       100,200, 100,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
+testArray				DWORD       100,200,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 
@@ -75,7 +75,7 @@ testProc PROC
 
 	PUSH	OFFSET testArray
 	MOV		EBX, OFFSET testArray
-	MOV		EAX, [EBX]
+	ADD		EBX, 4
 	PUSH	EBX	
 	call	exchangeElements	
 
@@ -202,23 +202,13 @@ _useTemptToSwitchElements:
 	MOV		[EDI], EAX
 
 	MOV		EAX, [ESI]
-	call	WriteDec 
-	call	CrlF
+	call	WriteDec
+	call	CrLf
 
 	MOV		EAX, [EDI]
 	call	WriteDec
 	
-; 	MOV		tempValue, [ESI] 
-_switchValues: 	
-; 	MOVSD											; [ESI] = [EDI]
-_switchDestinationAndSource:
-; 	MOV		tempIndex, ESI
-; 	MOV		ESI, EDI
-; 	MOV		EDI, tempIndex
-
-
-; 	MOVSD											; [E	
-
+	
 	POP		EBP
 	POP		ESP
 RET	8
