@@ -36,12 +36,21 @@ currentRowLength		DWORD		?
 ; fillArray
 randomElements			DWORD		ARRAYSIZE DUP(?)
 randomElementsIndex		DWORD		?
+
+; exchangeElements	
+tempIndex				DWORD		? 
+tempValue				DWORD		?
+
 	
 .code
 main PROC
 
 	call	Randomize
 	call	testProc
+	;call	fillArray
+	;PUSH	ARRAYSIZE
+	;PUSH	OFFSET randomElements
+	;call	displayArray
 
 
 	Invoke ExitProcess,0	; exit to operating system
@@ -64,11 +73,13 @@ main ENDP
 
 testProc PROC	
 
-	call	fillArray
-	PUSH	200
- 	PUSH	OFFSET randomElements
+	PUSH	OFFSET testArray
+	MOV		EBX, OFFSET testArray
+	MOV		EAX, [EBX]
+	PUSH	EBX	
+	call	exchangeElements	
 
-	call	displayArray
+
 RET
 testPROC ENDP
 
@@ -169,5 +180,48 @@ _continue:
 	
 RET		8
 displayArray ENDP
+
+exchangeElements PROC	
+	PUSH	ESP	
+	PUSH	EBP	
+	MOV		EBP, ESP
+
+	MOV		ESI, [EBP+12]							; ESI = indexOne
+	MOV		EDI, [EBP+16]							; EDI = indexTwo
+
+	; tempValue = [indexOne]
+
+_useTemptToSwitchElements:
+	MOV		EAX, [EDI]
+
+	MOV		EBX, [ESI]
+	MOV		tempValue, EBX
+	
+	MOV		[ESI], EAX 
+	MOV		EAX, tempValue 
+	MOV		[EDI], EAX
+
+	MOV		EAX, [ESI]
+	call	WriteDec 
+	call	CrlF
+
+	MOV		EAX, [EDI]
+	call	WriteDec
+	
+; 	MOV		tempValue, [ESI] 
+_switchValues: 	
+; 	MOVSD											; [ESI] = [EDI]
+_switchDestinationAndSource:
+; 	MOV		tempIndex, ESI
+; 	MOV		ESI, EDI
+; 	MOV		EDI, tempIndex
+
+
+; 	MOVSD											; [E	
+
+	POP		EBP
+	POP		ESP
+RET	8
+exchangeElements ENDP
 
 END main
