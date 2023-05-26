@@ -43,24 +43,31 @@ ENDM
 ; -----------------------------------------------------------------
 
 getParentIndex MACRO arrayIndex
-	PUSH	EAX
 	PUSH	EBX
+	PUSH	EDX
+_calibrateHeapIndex:
+	MOV		EAX, arrayIndex
+	MOV		EDX, 0
+	MOV		EBX, 4
+	DIV		EBX
+	MOV		arrayIndex, EAX			; arrayIndex /= 4
 
 ; -----------------------------------------------------------------
-; EDX = floor((arrayIndex-1*TYPE) / 2)
-; TYPE = 4
+; EAX = floor((arrayIndex-1*) / 2)
 ; -----------------------------------------------------------------
-		
-	SUB		arrayIndex, 4
+
+	SUB		arrayIndex, 1		
 
 _floorDivision:
-	MOV		EDX, 0
+
 	MOV		EAX, arrayIndex
+	MOV		EDX, 0
 	MOV		EBX, 2
-	DIV		EBX	
+	DIV		EBX
+
 _finish:
+	POP		EDX
 	POP		EBX
-	POP		EAX
 ENDM
 
 
@@ -156,17 +163,18 @@ _saveRegisterStates:
 _accessVariables:
 	MOV		EBX, [EBP+12]						; EBX = OFFSET inputArray
 	MOV		EAX, [EBP+16]						; EAX = LENGHTOF inputArray
-	
+
+	MOV		EAX, 32	
 	movLastArrayIndexToEAX EAX 	
 
 _heapifyIteratively:
+	
 
 
 ;; test: getParentIndex 
-	MOV	EAX, 4
-	getParentIndex EAX							; EDX = parentIndex
-	MOV		EAX, EDX
-	call	WriteDec
+	MOV	EAX, 28
+	getParentIndex EAX							; EAX = parentIndex
+	call	Writedec
 		
 	
 
