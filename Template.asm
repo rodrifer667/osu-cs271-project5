@@ -43,6 +43,8 @@ ARRAYSIZE = 200
 testArray				DWORD		9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
+no						BYTE		"No", 0
+yes						BYTE		"yes",	0
 
 
 ; displayArray
@@ -60,13 +62,16 @@ randomElementsIndex		DWORD		?
 tempIndex				DWORD		? 
 tempValue				DWORD		?
 
+; gnomeSort
+originalArrayOFFSET		DWORD		?
 	
 .code
 main PROC
 
 	call	Randomize
+	call	fillArray
+
 	call	testProc
-	;call	fillArray
 	;PUSH	ARRAYSIZE
 	;PUSH	OFFSET randomElements
 	;call	displayArray
@@ -92,11 +97,71 @@ main ENDP
 
 testProc PROC
 
-	MOV		testArrayLength, EAX
-	MOV		EAX, [testArrayLength]
-
+	PUSH	OFFSET testArray
+	call	gnomeSort	
 RET
 testPROC ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: gnomeSort
+;
+; Description: implement gnome sorting algorithm.
+;
+; Preconditions: OFFSET inputArray is pushed the runtime stack.
+;
+; Postconditions: 
+;
+; Returns:
+;
+; ---------------------------------------------------------------------------------
+
+gnomeSort PROC
+_storeRegisters:
+	PUSH	ESP
+	PUSH	EBP
+	MOV		EBP, ESP
+
+_accesArgument:
+	
+	MOV		EDI, [EBP+12]
+	MOV		originalArrayOFFSET, EDI
+	
+
+_iterateSortAlgorithm:
+	; ---------------------------------------------
+	; if ESI == 0: ESI += 4
+	; else: continue 
+	; ---------------------------------------------
+	_incrementZeroIndex:
+		SUB		EDI, originalArrayOFFSET		; configuers address
+		CMP		EDI, 0
+		JNE		_cmpTwinIndices	
+		ADD		EDI, 4
+	_cmpTwinIndices:
+		ADD		EDI, originalArrayOFFSET		; to compare to existing address
+		
+		_configureIndexIncrement:
+			MOV		EAX, EDI
+			ADD		EAX, 4
+
+		CMPSD	
+		JNE			_printYes
+
+		_printNo:
+			MOV		EDX,OFFSET no
+			call	WriteString
+		_printYes:	
+			MOV		EDX, OFFSET yes
+			call	WriteString	
+
+	
+
+		
+	POP		EBP
+	POP		ESP
+RET	4
+gnomeSort ENDP
+
 
 
 ; ---------------------------------------------------------------------------------
