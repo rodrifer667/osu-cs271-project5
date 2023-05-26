@@ -12,11 +12,11 @@ INCLUDE Irvine32.inc
 ; MACROS
 
 ;-----------------------------------------------------------------
-; Name: movLastIndexToEAX
+; Name: getLeftChild
 ; 
-; Puts the last index of a DWORD array into EAX.
+; gets the left child of parent index. 
 ; 
-; Preconditions: length of array is passed as input parameter.  
+; Preconditions:   
 ;
 ; recieves
 ; arrayLength = length of array
@@ -28,48 +28,6 @@ movLastArrayIndexToEAX MACRO arrayLength
 	SUB		arrayLength, 4
 	MOV		EAX, arrayLength
 ENDM
-
-;-----------------------------------------------------------------
-; Name: getParentIndex 
-;
-; gets the parentIndex of argument.
-;  
-; Preconditions: argument is pushed to the array.
-;
-; recieves
-; childIndex = index of child.
-;
-; returns: 
-; -----------------------------------------------------------------
-
-getParentIndex MACRO arrayIndex
-	PUSH	EBX
-	PUSH	EDX
-_calibrateHeapIndex:
-	MOV		EAX, arrayIndex
-	MOV		EDX, 0
-	MOV		EBX, 4
-	DIV		EBX
-	MOV		arrayIndex, EAX			; arrayIndex /= 4
-
-; -----------------------------------------------------------------
-; EAX = floor((arrayIndex-1*) / 2)
-; -----------------------------------------------------------------
-
-	SUB		arrayIndex, 1		
-
-_floorDivision:
-
-	MOV		EAX, arrayIndex
-	MOV		EDX, 0
-	MOV		EBX, 2
-	DIV		EBX
-
-_finish:
-	POP		EDX
-	POP		EBX
-ENDM
-
 
 ROW_LENGTH = 20
 
@@ -133,62 +91,13 @@ main ENDP
 ; ---------------------------------------------------------------------------------
 
 testProc PROC
-	
-	PUSH	testArrayLength
-	PUSH	OFFSET testArray
-	call	Heapify
+
+	MOV		testArrayLength, EAX
+	MOV		EAX, [testArrayLength]
+
 RET
 testPROC ENDP
 
-; ---------------------------------------------------------------------------------
-; Name: Heapifiy
-;
-; Description: This procedure makes the inputArray into a valid heap.
-;
-; Preconditions: OFFSET inputArray and LENGTHOF inputArray are pushed onto the stack.
-; the appropropriate variables are defined in the .data segment.
-;
-; Postconditions:	
-;
-; Returns:
-;
-; ---------------------------------------------------------------------------------
-
-Heapify PROC	
-_saveRegisterStates:
-	PUSH	ESP
-	PUSH	EBP
-	MOV		EBP, ESP
-
-_accessVariables:
-	MOV		EBX, [EBP+12]						; EBX = OFFSET inputArray
-	MOV		EAX, [EBP+16]						; EAX = LENGHTOF inputArray
-
-	MOV		EAX, 32	
-	movLastArrayIndexToEAX EAX 	
-
-_heapifyIteratively:
-	
-
-
-;; test: getParentIndex 
-	MOV	EAX, 28
-	getParentIndex EAX							; EAX = parentIndex
-	call	Writedec
-		
-	
-
-;_makeHeap:
-	; getParent( )
-	; correctImmediateFamily( )
-;_continueIfPositionNotZero
-
-
-;_finish:
-	POP		EBP
-	POP		ESP
-RET	8
-Heapify ENDP
 
 ; ---------------------------------------------------------------------------------
 ; Name: fillArray		
