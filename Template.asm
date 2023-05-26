@@ -9,7 +9,61 @@ TITLE Program Template     (template.asm)
 
 INCLUDE Irvine32.inc
 
-; (insert macro definitions here)
+; MACROS
+
+;-----------------------------------------------------------------
+; Name: movLastIndexToEAX
+; 
+; Puts the last index of a DWORD array into EAX.
+; 
+; Preconditions: length of array is passed as input parameter.  
+;
+; recieves
+; arrayLength = length of array
+;
+; returns: arrayAddress = position of array
+;-----------------------------------------------------------------
+
+movLastArrayIndexToEAX MACRO arrayLength
+	SUB		arrayLength, 4
+	MOV		EAX, arrayLength
+ENDM
+
+;-----------------------------------------------------------------
+; Name: getParentIndex 
+;
+; gets the parentIndex of argument.
+;  
+; Preconditions: argument is pushed to the array.
+;
+; recieves
+; childIndex = index of child.
+;
+; returns: 
+; -----------------------------------------------------------------
+
+getParentIndex MACRO arrayIndex
+	PUSH	EAX
+	PUSH	EBX
+
+; -----------------------------------------------------------------
+; EDX = floor((arrayIndex-1*TYPE) / 2)
+; TYPE = 4
+; -----------------------------------------------------------------
+		
+	SUB		arrayIndex, 4
+
+_floorDivision:
+	MOV		EDX, 0
+	MOV		EAX, arrayIndex
+	MOV		EBX, 2
+	DIV		EBX	
+_finish:
+	POP		EBX
+	POP		EAX
+ENDM
+
+
 ROW_LENGTH = 20
 
 ; fillArray PROC
@@ -21,7 +75,7 @@ ARRAYSIZE = 200
 
 .data
 
-testArray				DWORD       100,200,30,400,500,1 ,2, 2, 3, 3, 3, 3 ,3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5 ,5 , 3, 3, 3, 3, 3, 3,3, 3, 3, 3, 3, 3, 3,  3
+testArray				DWORD		9, 8, 7, 6, 5, 4, 3, 2, 1, 0
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 
@@ -71,17 +125,62 @@ main ENDP
 ;
 ; ---------------------------------------------------------------------------------
 
-testProc PROC	
-
+testProc PROC
+	
+	PUSH	testArrayLength
 	PUSH	OFFSET testArray
-	MOV		EBX, OFFSET testArray
-	ADD		EBX, 4
-	PUSH	EBX	
-	call	exchangeElements	
-
-
+	call	Heapify
 RET
 testPROC ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: Heapifiy
+;
+; Description: This procedure makes the inputArray into a valid heap.
+;
+; Preconditions: OFFSET inputArray and LENGTHOF inputArray are pushed onto the stack.
+; the appropropriate variables are defined in the .data segment.
+;
+; Postconditions:	
+;
+; Returns:
+;
+; ---------------------------------------------------------------------------------
+
+Heapify PROC	
+_saveRegisterStates:
+	PUSH	ESP
+	PUSH	EBP
+	MOV		EBP, ESP
+
+_accessVariables:
+	MOV		EBX, [EBP+12]						; EBX = OFFSET inputArray
+	MOV		EAX, [EBP+16]						; EAX = LENGHTOF inputArray
+	
+	movLastArrayIndexToEAX EAX 	
+
+_heapifyIteratively:
+
+
+;; test: getParentIndex 
+	MOV	EAX, 4
+	getParentIndex EAX							; EDX = parentIndex
+	MOV		EAX, EDX
+	call	WriteDec
+		
+	
+
+;_makeHeap:
+	; getParent( )
+	; correctImmediateFamily( )
+;_continueIfPositionNotZero
+
+
+;_finish:
+	POP		EBP
+	POP		ESP
+RET	8
+Heapify ENDP
 
 ; ---------------------------------------------------------------------------------
 ; Name: fillArray		
@@ -89,7 +188,8 @@ testPROC ENDP
 ; Description: fills the array with random elements between the two specified bounds
 ;
 ; Preconditions: LO, HI, and ARRAY_SIZE are declared in the data segment
-; array address is declared in .data, and arrayAddress OFFSET is pushed to the PROC
+; array address is declared in .data, and arrayAddress OFFSET is pushed to the PROC. 
+; Registers modified: EAX, ECX, and ESI.
 ;
 ; Postconditions: EAX is modified; new array holds values
 ;
@@ -132,7 +232,7 @@ fillArray ENDP
 ;
 ; Preconditions: array OFFSET and array length are pushed to stack, respectively.
 ;
-; Postconditions: NA	
+; Postconditions: ADBS Modified registers are EAX, EDI, EBX, and ESI	
 ;
 ; Returns: NA
 ;
@@ -199,12 +299,6 @@ _useTemptsToSwitchElements:
 	MOV		EAX, EBX 
 	MOV		[EDI], EAX
 
-	MOV		EAX, [ESI]
-	call	WriteDec
-
-	MOV		EAX, [EDI]
-	call	WriteDec
-	
 	POP		EBP
 	POP		ESP
 RET	8
