@@ -40,7 +40,7 @@ ARRAYSIZE = 200
 
 .data
 
-testArray				DWORD		9, 8, 7, 6, 5, 4, 3, 2, 1, 0
+testArray				DWORD		19, 10, 7, 6, 5, 4, 3, 2, 1, 0
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -140,12 +140,14 @@ _iterateSortAlgorithm:
 	_cmpTwinIndices:
 		ADD		EDI, originalArrayOFFSET		; to compare to existing address
 		
-		_configureIndexIncrement:
+		_configureIndexDecrement:
 			MOV		EAX, EDI
-			ADD		EAX, 4
+			SUB		EAX, 4						; EAX = currIndex - 4
 
-		CMPSD	
-		JNE			_printYes
+		_cmpElementSizes:
+			MOV		EBX, [EDI]
+			CMP		EAX, EBX
+			JG			_printYes
 
 		_printNo:
 			MOV		EDX,OFFSET no
