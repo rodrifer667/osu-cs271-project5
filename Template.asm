@@ -12,21 +12,23 @@ INCLUDE Irvine32.inc
 ; MACROS
 
 ;-----------------------------------------------------------------
-; Name: getLeftChild
+; Name: lastIndexToEBX
 ; 
-; gets the left child of parent index. 
+; EBX gets the address of the last index. 
 ; 
-; Preconditions:   
+; Preconditions: arrayLength and arrayOFFSET are passed as arguments. 
 ;
 ; recieves
 ; arrayLength = length of array
+; arrayOFFSET
 ;
-; returns: arrayAddress = position of array
+; returns: EBX = address of last index.
 ;-----------------------------------------------------------------
 
-movLastArrayIndexToEAX MACRO arrayLength
-	SUB		arrayLength, 4
-	MOV		EAX, arrayLength
+lastIndexToEBX MACRO arrayLength, arrayStartingIndex
+	MUL		arrayLength, 4
+	MOV		ESI, arrayLength
+	ADD		ESI, arrayStartingIndex
 ENDM
 
 ROW_LENGTH = 20
@@ -64,6 +66,8 @@ tempValue				DWORD		?
 
 ; gnomeSort
 originalArrayOFFSET		DWORD		?
+lastArrayIndex			DWORD		?
+
 	
 .code
 main PROC
@@ -97,8 +101,21 @@ main ENDP
 
 testProc PROC
 
+	PUSH	10
 	PUSH	OFFSET testArray
-	call	gnomeSort	
+	call	displayArray
+	call	CrLf
+
+	PUSH	OFFSET testArray
+	call	gnomeSort
+
+	;;test
+
+
+	PUSH	10
+	PUSH	OFFSET testArray
+	call	displayArray
+
 RET
 testPROC ENDP
 
@@ -122,11 +139,10 @@ _storeRegisters:
 	MOV		EBP, ESP
 
 _accesArgument:
-	
 	MOV		EDI, [EBP+12]
 	MOV		originalArrayOFFSET, EDI
-	
 
+	
 _iterateSortAlgorithm:
 	; ---------------------------------------------
 	; if ESI == 0: ESI += 4
@@ -147,7 +163,7 @@ _iterateSortAlgorithm:
 		_cmpElementSizes:
 			MOV		EBX, [EDI]
 			CMP		[EAX], EBX
-			JG		_printYes
+			JNLE	_incrmentIndex	
 
 		_swapElements:
 			PUSH	EAX
@@ -155,22 +171,44 @@ _iterateSortAlgorithm:
 			call	exchangeElements
 
 			SUB		EDI, 4
-			JMP		_finish
+			JMP		_continue
+		_incrmentIndex:		
 
+		MOV		EAX, EDI
+		call	WriteDec	
+		call	CrLf
+		ADD		EDI, 4
+		MOV		EAX, EDI
+		call	WriteDec
+		call	CrlF
+
+	_continue:
+	_lastArrayIndexToESI:
+		MOV		ESI, originalArrayOFFSET
+		MOV		EAX, ESI
+		call	Writedec
+		call	CrlF
+		
+		PUSH	EBX 
+;-------------------------------------------------
+;	ESI = (ARRAYSIZE * 4 + originalArrayOFFSSET
+; -------------------------------------------------
+		MOV		EBX, ARRAYSIZE
+		MOV		EAX, 4
+		MUL		EBX 
+		ADD		ESI, EBX
+		MOV		EAX, ESI
+		call WriteDec
+
+
+		POP		EBX 
+		call	Writedec
 			
-		
-		_printYes:	
-			MOV		EDX, OFFSET yes
-			call	WriteString	
-
 	_finish:	
-
-		
 	POP		EBP
 	POP		ESP
 RET	4
 gnomeSort ENDP
-
 
 
 ; ---------------------------------------------------------------------------------
