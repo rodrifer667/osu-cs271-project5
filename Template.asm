@@ -42,7 +42,7 @@ ARRAYSIZE = 10
 
 .data
 
-testArray				DWORD		1, 11, 7, 6, 5, 4, 3, 2, 1, 0
+testArray				DWORD		11, 1, 7, 6, 5, 4, 3, 2, 1, 0
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -163,8 +163,14 @@ _lastArrayIndexToESI:
 		call WriteDec
 		call crlf
 
+		POP		EBX 
+
+
 	
 _iterateSortAlgorithm:
+	PUSH	ARRAYSiZE
+	PUSH	originalArrayOFFSET	
+	call	displayArray
 	; ---------------------------------------------
 	; if ESI == 0: ESI += 4
 	; else: continue 
@@ -195,16 +201,18 @@ _iterateSortAlgorithm:
 			JMP		_continue
 		_incrmentIndex:		
 
-		MOV		EAX, EDI
-		ADD		EDI, 4
-		MOV		EAX, EDI
+			MOV		EAX, EDI
+			ADD		EDI, 4
+			MOV		EAX, EDI
 
 	_continue:
+		_cmpLastIndex:
+			; ----------------------------------------------
+			; if currenIndex < finalIndex: JMP _iterateSortAlgorithm 
+			; ----------------------------------------------
+			CMP		ESI, EDI
+			JGE		_iterateSortAlgorithm
 
-
-
-		POP		EBX 
-			
 	_finish:	
 	POP		EBP
 	POP		ESP
