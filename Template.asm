@@ -142,6 +142,27 @@ _accesArgument:
 	MOV		EDI, [EBP+12]
 	MOV		originalArrayOFFSET, EDI
 
+_lastArrayIndexToESI:
+		MOV		ESI, originalArrayOFFSET
+		MOV		EAX, ESI
+		call	Writedec
+		call	CrlF
+		
+		PUSH	EBX 
+;-------------------------------------------------
+;	ESI = ARRAYSIZE * 4 + originalArrayOFFSSET
+; -------------------------------------------------
+		MOV		EBX, ARRAYSIZE
+		MOV		EAX, EBX
+		MOV		EAX, 4
+		MUL		EBX 
+		MOV		EBX, EAX
+		ADD		ESI, EBX
+		
+		MOV		EAX, ESI
+		call WriteDec
+		call crlf
+
 	
 _iterateSortAlgorithm:
 	; ---------------------------------------------
@@ -179,26 +200,7 @@ _iterateSortAlgorithm:
 		MOV		EAX, EDI
 
 	_continue:
-	_lastArrayIndexToESI:
-		MOV		ESI, originalArrayOFFSET
-		MOV		EAX, ESI
-		call	Writedec
-		call	CrlF
-		
-		PUSH	EBX 
-;-------------------------------------------------
-;	ESI = ARRAYSIZE * 4 + originalArrayOFFSSET
-; -------------------------------------------------
-		MOV		EBX, ARRAYSIZE
-		MOV		EAX, EBX
-		MOV		EAX, 4
-		MUL		EBX 
-		MOV		EBX, EAX
-		ADD		ESI, EBX
-		
-		MOV		EAX, ESI
-		call WriteDec
-		call crlf
+
 
 
 		POP		EBX 

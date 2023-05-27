@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:09:41
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:11:29
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -177,63 +177,65 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:09:41
  00000042  8B 7D 0C			MOV		EDI, [EBP+12]
  00000045  89 3D 00000083 R		MOV		originalArrayOFFSET, EDI
 
+ 0000004B			_lastArrayIndexToESI:
+ 0000004B  8B 35 00000083 R			MOV		ESI, originalArrayOFFSET
+ 00000051  8B C6				MOV		EAX, ESI
+ 00000053  E8 00000000 E			call	Writedec
+ 00000058  E8 00000000 E			call	CrlF
+						
+ 0000005D  53					PUSH	EBX 
+				;-------------------------------------------------
+				;	ESI = ARRAYSIZE * 4 + originalArrayOFFSSET
+				; -------------------------------------------------
+ 0000005E  BB 0000000A				MOV		EBX, ARRAYSIZE
+ 00000063  8B C3				MOV		EAX, EBX
+ 00000065  B8 00000004				MOV		EAX, 4
+ 0000006A  F7 E3				MUL		EBX 
+ 0000006C  8B D8				MOV		EBX, EAX
+ 0000006E  03 F3				ADD		ESI, EBX
+						
+ 00000070  8B C6				MOV		EAX, ESI
+ 00000072  E8 00000000 E			call WriteDec
+ 00000077  E8 00000000 E			call crlf
+
 					
- 0000004B			_iterateSortAlgorithm:
+ 0000007C			_iterateSortAlgorithm:
 					; ---------------------------------------------
 					; if ESI == 0: ESI += 4
 					; else: continue 
 					; ---------------------------------------------
- 0000004B				_incrementZeroIndex:
- 0000004B  2B 3D 00000083 R			SUB		EDI, originalArrayOFFSET		; configuers address
- 00000051  83 FF 00				CMP		EDI, 0
- 00000054  75 03				JNE		_cmpTwinIndices	
- 00000056  83 C7 04				ADD		EDI, 4
- 00000059				_cmpTwinIndices:
- 00000059  03 3D 00000083 R			ADD		EDI, originalArrayOFFSET		; to compare to existing address
+ 0000007C				_incrementZeroIndex:
+ 0000007C  2B 3D 00000083 R			SUB		EDI, originalArrayOFFSET		; configuers address
+ 00000082  83 FF 00				CMP		EDI, 0
+ 00000085  75 03				JNE		_cmpTwinIndices	
+ 00000087  83 C7 04				ADD		EDI, 4
+ 0000008A				_cmpTwinIndices:
+ 0000008A  03 3D 00000083 R			ADD		EDI, originalArrayOFFSET		; to compare to existing address
 						
- 0000005F					_configureIndexDecrement:
- 0000005F  8B C7					MOV		EAX, EDI
- 00000061  83 E8 04					SUB		EAX, 4						; EAX = currIndex - 4
+ 00000090					_configureIndexDecrement:
+ 00000090  8B C7					MOV		EAX, EDI
+ 00000092  83 E8 04					SUB		EAX, 4						; EAX = currIndex - 4
 
- 00000064					_cmpElementSizes:
- 00000064  8B 1F					MOV		EBX, [EDI]
- 00000066  39 18					CMP		[EAX], EBX
- 00000068  7F 0C					JNLE	_incrmentIndex	
+ 00000095					_cmpElementSizes:
+ 00000095  8B 1F					MOV		EBX, [EDI]
+ 00000097  39 18					CMP		[EAX], EBX
+ 00000099  7F 0C					JNLE	_incrmentIndex	
 
- 0000006A					_swapElements:
- 0000006A  50						PUSH	EAX
- 0000006B  57						PUSH	EDI	
- 0000006C  E8 000000AE					call	exchangeElements
+ 0000009B					_swapElements:
+ 0000009B  50						PUSH	EAX
+ 0000009C  57						PUSH	EDI	
+ 0000009D  E8 0000007D					call	exchangeElements
 
- 00000071  83 EF 04					SUB		EDI, 4
- 00000074  EB 07					JMP		_continue
- 00000076					_incrmentIndex:		
+ 000000A2  83 EF 04					SUB		EDI, 4
+ 000000A5  EB 07					JMP		_continue
+ 000000A7					_incrmentIndex:		
 
- 00000076  8B C7				MOV		EAX, EDI
- 00000078  83 C7 04				ADD		EDI, 4
- 0000007B  8B C7				MOV		EAX, EDI
+ 000000A7  8B C7				MOV		EAX, EDI
+ 000000A9  83 C7 04				ADD		EDI, 4
+ 000000AC  8B C7				MOV		EAX, EDI
 
- 0000007D				_continue:
- 0000007D				_lastArrayIndexToESI:
- 0000007D  8B 35 00000083 R			MOV		ESI, originalArrayOFFSET
- 00000083  8B C6				MOV		EAX, ESI
- 00000085  E8 00000000 E			call	Writedec
- 0000008A  E8 00000000 E			call	CrlF
-						
- 0000008F  53					PUSH	EBX 
-				;-------------------------------------------------
-				;	ESI = ARRAYSIZE * 4 + originalArrayOFFSSET
-				; -------------------------------------------------
- 00000090  BB 0000000A				MOV		EBX, ARRAYSIZE
- 00000095  8B C3				MOV		EAX, EBX
- 00000097  B8 00000004				MOV		EAX, 4
- 0000009C  F7 E3				MUL		EBX 
- 0000009E  8B D8				MOV		EBX, EAX
- 000000A0  03 F3				ADD		ESI, EBX
-						
- 000000A2  8B C6				MOV		EAX, ESI
- 000000A4  E8 00000000 E			call WriteDec
- 000000A9  E8 00000000 E			call crlf
+ 000000AE				_continue:
+
 
 
  000000AE  5B					POP		EBX 
@@ -368,7 +370,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:09:41
  00000138			exchangeElements ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:09:41
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/27/23 16:11:29
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -591,15 +593,15 @@ fillArray  . . . . . . . . . . .	P Near	 000000B4 _TEXT	Length= 00000022 Public 
 gnomeSort  . . . . . . . . . . .	P Near	 0000003E _TEXT	Length= 00000076 Public STDCALL
   _storeRegisters  . . . . . . .	L Near	 0000003E _TEXT	
   _accesArgument . . . . . . . .	L Near	 00000042 _TEXT	
-  _iterateSortAlgorithm  . . . .	L Near	 0000004B _TEXT	
-  _incrementZeroIndex  . . . . .	L Near	 0000004B _TEXT	
-  _cmpTwinIndices  . . . . . . .	L Near	 00000059 _TEXT	
-  _configureIndexDecrement . . .	L Near	 0000005F _TEXT	
-  _cmpElementSizes . . . . . . .	L Near	 00000064 _TEXT	
-  _swapElements  . . . . . . . .	L Near	 0000006A _TEXT	
-  _incrmentIndex . . . . . . . .	L Near	 00000076 _TEXT	
-  _continue  . . . . . . . . . .	L Near	 0000007D _TEXT	
-  _lastArrayIndexToESI . . . . .	L Near	 0000007D _TEXT	
+  _lastArrayIndexToESI . . . . .	L Near	 0000004B _TEXT	
+  _iterateSortAlgorithm  . . . .	L Near	 0000007C _TEXT	
+  _incrementZeroIndex  . . . . .	L Near	 0000007C _TEXT	
+  _cmpTwinIndices  . . . . . . .	L Near	 0000008A _TEXT	
+  _configureIndexDecrement . . .	L Near	 00000090 _TEXT	
+  _cmpElementSizes . . . . . . .	L Near	 00000095 _TEXT	
+  _swapElements  . . . . . . . .	L Near	 0000009B _TEXT	
+  _incrmentIndex . . . . . . . .	L Near	 000000A7 _TEXT	
+  _continue  . . . . . . . . . .	L Near	 000000AE _TEXT	
   _finish  . . . . . . . . . . .	L Near	 000000AF _TEXT	
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
