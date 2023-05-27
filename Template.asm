@@ -36,7 +36,7 @@ ROW_LENGTH = 20
 ; fillArray PROC
 LO = 20
 HI = 30
-ARRAYSIZE = 200
+ARRAYSIZE = 10
 
 ; (insert constant definitions here)
 
@@ -175,12 +175,8 @@ _iterateSortAlgorithm:
 		_incrmentIndex:		
 
 		MOV		EAX, EDI
-		call	WriteDec	
-		call	CrLf
 		ADD		EDI, 4
 		MOV		EAX, EDI
-		call	WriteDec
-		call	CrlF
 
 	_continue:
 	_lastArrayIndexToESI:
@@ -191,18 +187,21 @@ _iterateSortAlgorithm:
 		
 		PUSH	EBX 
 ;-------------------------------------------------
-;	ESI = (ARRAYSIZE * 4 + originalArrayOFFSSET
+;	ESI = ARRAYSIZE * 4 + originalArrayOFFSSET
 ; -------------------------------------------------
 		MOV		EBX, ARRAYSIZE
+		MOV		EAX, EBX
 		MOV		EAX, 4
 		MUL		EBX 
+		MOV		EBX, EAX
 		ADD		ESI, EBX
+		
 		MOV		EAX, ESI
 		call WriteDec
+		call crlf
 
 
 		POP		EBX 
-		call	Writedec
 			
 	_finish:	
 	POP		EBP
