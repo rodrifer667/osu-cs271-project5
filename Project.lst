@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 20:16:59
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -61,8 +61,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
 
  00000000			.data
 
- 00000000 00000013		testArray				DWORD		19, 10, 7, 6, 5, 4, 3, 2, 1, 0
-	   0000000A
+ 00000000 00000001		testArray				DWORD		1, 11, 7, 6, 5, 4, 3, 2, 1, 0
+	   0000000B
 	   00000007
 	   00000006
 	   00000005
@@ -102,7 +102,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
  00000000			main PROC
 
  00000000  E8 00000000 E		call	Randomize
- 00000005  E8 0000005C			call	fillArray
+ 00000005  E8 0000005E			call	fillArray
 
  0000000A  E8 00000007			call	testProc
 					;PUSH	ARRAYSIZE
@@ -181,23 +181,30 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
 
  00000047					_cmpElementSizes:
  00000047  8B 1F					MOV		EBX, [EDI]
- 00000049  3B C3					CMP		EAX, EBX
- 0000004B  7F 0A					JG			_printYes
+ 00000049  39 18					CMP		[EAX], EBX
+ 0000004B  7F 0C					JG		_printYes
 
- 0000004D					_printNo:
- 0000004D  BA 00000030 R				MOV		EDX,OFFSET no
- 00000052  E8 00000000 E				call	WriteString
- 00000057					_printYes:	
- 00000057  BA 00000033 R				MOV		EDX, OFFSET yes
- 0000005C  E8 00000000 E				call	WriteString	
+ 0000004D					_swapElements:
+ 0000004D  50						PUSH	EAX
+ 0000004E  57						PUSH	EDI	
+ 0000004F  E8 0000007F					call	exchangeElements
 
-					
+ 00000054  83 EF 04					SUB		EDI, 4
+ 00000057  EB 0A					JMP		_finish
+
+							
+						
+ 00000059					_printYes:	
+ 00000059  BA 00000033 R				MOV		EDX, OFFSET yes
+ 0000005E  E8 00000000 E				call	WriteString	
+
+ 00000063				_finish:	
 
 						
- 00000061  5D				POP		EBP
- 00000062  5C				POP		ESP
- 00000063  C2 0004		RET	4
- 00000066			gnomeSort ENDP
+ 00000063  5D				POP		EBP
+ 00000064  5C				POP		ESP
+ 00000065  C2 0004		RET	4
+ 00000068			gnomeSort ENDP
 
 
 
@@ -216,33 +223,33 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
 				;
 				; ---------------------------------------------------------------------------------
 
- 00000066			fillArray PROC	
+ 00000068			fillArray PROC	
 
- 00000066  BE 0000004F R		MOV		ESI, OFFSET randomElements			; ESI = index of randomElements
- 0000006B  B9 000000C8			MOV		ECX, ARRAYSIZE	
- 00000070			_appendElements:
+ 00000068  BE 0000004F R		MOV		ESI, OFFSET randomElements			; ESI = index of randomElements
+ 0000006D  B9 000000C8			MOV		ECX, ARRAYSIZE	
+ 00000072			_appendElements:
 				; --------------------------
 				; get randomNumber betweenm [LO, HI]
 				; EAX = randomeNumber
 				; --------------------------
- 00000070			_getRandomNumber:
- 00000070  B8 0000001E			MOV		EAX, HI
- 00000075  40				INC		EAX
- 00000076  E8 00000000 E		call	RandomRange
+ 00000072			_getRandomNumber:
+ 00000072  B8 0000001E			MOV		EAX, HI
+ 00000077  40				INC		EAX
+ 00000078  E8 00000000 E		call	RandomRange
 					; if randomNumber < LO: JMP _getRandomNumber
- 0000007B  83 F8 14			CMP		EAX, LO	
- 0000007E  72 F0			JB		_getRandomNumber					; EAX = randomNumber
+ 0000007D  83 F8 14			CMP		EAX, LO	
+ 00000080  72 F0			JB		_getRandomNumber					; EAX = randomNumber
 
 				; --------------------------
 				; add element to randomElements Array 
 				; --------------------------
- 00000080			_addElementToArray:	
- 00000080  89 06			MOV		[ESI], EAX							; randomElements[ESI] = randomNumebr
- 00000082  83 C6 04			ADD		ESI, 4
- 00000085  E2 E9			LOOP	_appendElements
+ 00000082			_addElementToArray:	
+ 00000082  89 06			MOV		[ESI], EAX							; randomElements[ESI] = randomNumebr
+ 00000084  83 C6 04			ADD		ESI, 4
+ 00000087  E2 E9			LOOP	_appendElements
 
- 00000087  C3			RET
- 00000088			fillArray ENDP
+ 00000089  C3			RET
+ 0000008A			fillArray ENDP
 
 				; ---------------------------------------------------------------------------------
 				; Name: procedureName
@@ -256,75 +263,75 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
 				; Returns: NA
 				;
 				; ---------------------------------------------------------------------------------
- 00000088			displayArray PROC
- 00000088  54				PUSH	ESP
- 00000089  55				PUSH	EBP	
- 0000008A  8B EC			MOV		EBP, ESP
+ 0000008A			displayArray PROC
+ 0000008A  54				PUSH	ESP
+ 0000008B  55				PUSH	EBP	
+ 0000008C  8B EC			MOV		EBP, ESP
 
- 0000008C			_loadArray:		
- 0000008C  8B 75 0C			MOV		ESI, [EBP+12]				; [ESI] = inputArray
- 0000008F  8B 7D 10			MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
+ 0000008E			_loadArray:		
+ 0000008E  8B 75 0C			MOV		ESI, [EBP+12]				; [ESI] = inputArray
+ 00000091  8B 7D 10			MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
 
 
 				; for(i=LENGTHOF inputArray; i > 0; i --) {
- 00000092  8B CF			MOV		ECX, EDI
- 00000094			_printElement:
- 00000094  8B 06			MOV		EAX, [ESI]
- 00000096  E8 00000000 E		call	WriteDec	
+ 00000094  8B CF			MOV		ECX, EDI
+ 00000096			_printElement:
+ 00000096  8B 06			MOV		EAX, [ESI]
+ 00000098  E8 00000000 E		call	WriteDec	
 					; print(' ')
- 0000009B  BA 0000003F R		MOV		EDX, OFFSET space
- 000000A0  E8 00000000 E		call	WriteString					
- 000000A5  83 C6 04			ADD		ESI, 4
- 000000A8  FF 05 0000004B R		INC		currentRowLength	
- 000000AE			_indentConditionally:	
+ 0000009D  BA 0000003F R		MOV		EDX, OFFSET space
+ 000000A2  E8 00000000 E		call	WriteString					
+ 000000A7  83 C6 04			ADD		ESI, 4
+ 000000AA  FF 05 0000004B R		INC		currentRowLength	
+ 000000B0			_indentConditionally:	
 					; if currentRowLengthl < rowLength: JMP printElement 
 					; else: CrLf
- 000000AE  8B 1D 0000004B R		MOV		EBX, currentRowLength 
- 000000B4  83 FB 14			CMP		EBX, ROW_LENGTH 
- 000000B7  75 11			JNE		_continue	
- 000000B9  E8 00000000 E		call	CrlF
+ 000000B0  8B 1D 0000004B R		MOV		EBX, currentRowLength 
+ 000000B6  83 FB 14			CMP		EBX, ROW_LENGTH 
+ 000000B9  75 11			JNE		_continue	
+ 000000BB  E8 00000000 E		call	CrlF
 				; --------------------------
 				; reset currentRowLength
 				; --------------------------
- 000000BE  50				PUSH	EAX
- 000000BF  B8 00000000			MOV		EAX, 0
- 000000C4  A3 0000004B R		MOV		currentRowLength, EAX
- 000000C9  58				POP		EAX
+ 000000C0  50				PUSH	EAX
+ 000000C1  B8 00000000			MOV		EAX, 0
+ 000000C6  A3 0000004B R		MOV		currentRowLength, EAX
+ 000000CB  58				POP		EAX
 
- 000000CA			_continue:
- 000000CA  E2 C8			LOOP	_printElement
+ 000000CC			_continue:
+ 000000CC  E2 C8			LOOP	_printElement
 					
- 000000CC  5D				POP		EBP
- 000000CD  5C				POP		ESP
+ 000000CE  5D				POP		EBP
+ 000000CF  5C				POP		ESP
 					
- 000000CE  C2 0008		RET		8
- 000000D1			displayArray ENDP
+ 000000D0  C2 0008		RET		8
+ 000000D3			displayArray ENDP
 
- 000000D1			exchangeElements PROC	
- 000000D1  54				PUSH	ESP	
- 000000D2  55				PUSH	EBP	
- 000000D3  8B EC			MOV		EBP, ESP
+ 000000D3			exchangeElements PROC	
+ 000000D3  54				PUSH	ESP	
+ 000000D4  55				PUSH	EBP	
+ 000000D5  8B EC			MOV		EBP, ESP
 
- 000000D5  8B 75 0C			MOV		ESI, [EBP+12]							; ESI = indexOne
- 000000D8  8B 7D 10			MOV		EDI, [EBP+16]							; EDI = indexTwo
+ 000000D7  8B 75 0C			MOV		ESI, [EBP+12]							; ESI = indexOne
+ 000000DA  8B 7D 10			MOV		EDI, [EBP+16]							; EDI = indexTwo
 
 					; tempValue = [indexOne]
 
- 000000DB			_useTemptsToSwitchElements:
+ 000000DD			_useTemptsToSwitchElements:
 				; [indexOne], [indexTwo] = [IndexTwo], [indexOne]
- 000000DB  8B 07			MOV		EAX, [EDI]
- 000000DD  8B 1E			MOV		EBX, [ESI]
- 000000DF  89 06			MOV		[ESI], EAX 
- 000000E1  8B C3			MOV		EAX, EBX 
- 000000E3  89 07			MOV		[EDI], EAX
+ 000000DD  8B 07			MOV		EAX, [EDI]
+ 000000DF  8B 1E			MOV		EBX, [ESI]
+ 000000E1  89 06			MOV		[ESI], EAX 
+ 000000E3  8B C3			MOV		EAX, EBX 
+ 000000E5  89 07			MOV		[EDI], EAX
 
- 000000E5  5D				POP		EBP
- 000000E6  5C				POP		ESP
- 000000E7  C2 0008		RET	8
- 000000EA			exchangeElements ENDP
+ 000000E7  5D				POP		EBP
+ 000000E8  5C				POP		ESP
+ 000000E9  C2 0008		RET	8
+ 000000EC			exchangeElements ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 17:40:19
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/26/23 20:16:59
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -426,7 +433,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 0000037F Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EA Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EC Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -533,18 +540,18 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-displayArray . . . . . . . . . .	P Near	 00000088 _TEXT	Length= 00000049 Public STDCALL
-  _loadArray . . . . . . . . . .	L Near	 0000008C _TEXT	
-  _printElement  . . . . . . . .	L Near	 00000094 _TEXT	
-  _indentConditionally . . . . .	L Near	 000000AE _TEXT	
-  _continue  . . . . . . . . . .	L Near	 000000CA _TEXT	
-exchangeElements . . . . . . . .	P Near	 000000D1 _TEXT	Length= 00000019 Public STDCALL
-  _useTemptsToSwitchElements . .	L Near	 000000DB _TEXT	
-fillArray  . . . . . . . . . . .	P Near	 00000066 _TEXT	Length= 00000022 Public STDCALL
-  _appendElements  . . . . . . .	L Near	 00000070 _TEXT	
-  _getRandomNumber . . . . . . .	L Near	 00000070 _TEXT	
-  _addElementToArray . . . . . .	L Near	 00000080 _TEXT	
-gnomeSort  . . . . . . . . . . .	P Near	 00000021 _TEXT	Length= 00000045 Public STDCALL
+displayArray . . . . . . . . . .	P Near	 0000008A _TEXT	Length= 00000049 Public STDCALL
+  _loadArray . . . . . . . . . .	L Near	 0000008E _TEXT	
+  _printElement  . . . . . . . .	L Near	 00000096 _TEXT	
+  _indentConditionally . . . . .	L Near	 000000B0 _TEXT	
+  _continue  . . . . . . . . . .	L Near	 000000CC _TEXT	
+exchangeElements . . . . . . . .	P Near	 000000D3 _TEXT	Length= 00000019 Public STDCALL
+  _useTemptsToSwitchElements . .	L Near	 000000DD _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 00000068 _TEXT	Length= 00000022 Public STDCALL
+  _appendElements  . . . . . . .	L Near	 00000072 _TEXT	
+  _getRandomNumber . . . . . . .	L Near	 00000072 _TEXT	
+  _addElementToArray . . . . . .	L Near	 00000082 _TEXT	
+gnomeSort  . . . . . . . . . . .	P Near	 00000021 _TEXT	Length= 00000047 Public STDCALL
   _storeRegisters  . . . . . . .	L Near	 00000021 _TEXT	
   _accesArgument . . . . . . . .	L Near	 00000025 _TEXT	
   _iterateSortAlgorithm  . . . .	L Near	 0000002E _TEXT	
@@ -552,8 +559,9 @@ gnomeSort  . . . . . . . . . . .	P Near	 00000021 _TEXT	Length= 00000045 Public 
   _cmpTwinIndices  . . . . . . .	L Near	 0000003C _TEXT	
   _configureIndexDecrement . . .	L Near	 00000042 _TEXT	
   _cmpElementSizes . . . . . . .	L Near	 00000047 _TEXT	
-  _printNo . . . . . . . . . . .	L Near	 0000004D _TEXT	
-  _printYes  . . . . . . . . . .	L Near	 00000057 _TEXT	
+  _swapElements  . . . . . . . .	L Near	 0000004D _TEXT	
+  _printYes  . . . . . . . . . .	L Near	 00000059 _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 00000063 _TEXT	
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C

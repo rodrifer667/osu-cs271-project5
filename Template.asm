@@ -40,7 +40,7 @@ ARRAYSIZE = 200
 
 .data
 
-testArray				DWORD		19, 10, 7, 6, 5, 4, 3, 2, 1, 0
+testArray				DWORD		1, 11, 7, 6, 5, 4, 3, 2, 1, 0
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -146,17 +146,24 @@ _iterateSortAlgorithm:
 
 		_cmpElementSizes:
 			MOV		EBX, [EDI]
-			CMP		EAX, EBX
-			JG			_printYes
+			CMP		[EAX], EBX
+			JG		_printYes
 
-		_printNo:
-			MOV		EDX,OFFSET no
-			call	WriteString
+		_swapElements:
+			PUSH	EAX
+			PUSH	EDI	
+			call	exchangeElements
+
+			SUB		EDI, 4
+			JMP		_finish
+
+			
+		
 		_printYes:	
 			MOV		EDX, OFFSET yes
 			call	WriteString	
 
-	
+	_finish:	
 
 		
 	POP		EBP
