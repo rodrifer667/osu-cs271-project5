@@ -11,24 +11,41 @@ INCLUDE Irvine32.inc
 
 ; MACROS
 
+printTestArray MACRO
+	PUSHAD
+
+	PUSH	ARRAYSIZE
+	PUSH	OFFSET testArray
+	call	displayArray	
+	call	CrlF
+
+	POPAD
+ENDM
+
 ;-----------------------------------------------------------------
-; Name: lastIndexToEBX
+; Name: printElement 
 ; 
-; EBX gets the address of the last index. 
+; prints the element along with a space.
 ; 
-; Preconditions: arrayLength and arrayOFFSET are passed as arguments. 
+; Preconditions: address of index is passed as an argument.
 ;
 ; recieves
-; arrayLength = length of array
-; arrayOFFSET
+; indexAddress = address of index.
 ;
-; returns: EBX = address of last index.
+; returns: NA
 ;-----------------------------------------------------------------
 
-lastIndexToEBX MACRO arrayLength, arrayStartingIndex
-	MUL		arrayLength, 4
-	MOV		ESI, arrayLength
-	ADD		ESI, arrayStartingIndex
+printElement MACRO addressIndex
+	PUSHAD 
+
+	MOV		EAX, [addressIndex]
+	call	WriteDec	
+
+	MOV		EDX, Space
+	call	Writestring
+
+	POPAD
+
 ENDM
 
 ROW_LENGTH = 20
@@ -36,13 +53,13 @@ ROW_LENGTH = 20
 ; fillArray PROC
 LO = 20
 HI = 30
-ARRAYSIZE = 10
+ARRAYSIZE = 9
 
 ; (insert constant definitions here)
 
 .data
 
-testArray				DWORD		11, 1, 7, 6, 5, 4, 3, 2, 1, 0
+testArray				DWORD		25, 2, 43, 23, 33, 33, 43, 21, 33 
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -55,6 +72,7 @@ numberRows				DWORD		?
 space					DWORD		' ', 0
 inputArrayOFFSET		DWORD		?
 currentRowLength		DWORD		?
+inputArrayLength		DWORD		?
 
 ; fillArray
 randomElements			DWORD		ARRAYSIZE DUP(?)
@@ -74,11 +92,7 @@ main PROC
 
 	call	Randomize
 	call	fillArray
-
 	call	testProc
-	;PUSH	ARRAYSIZE
-	;PUSH	OFFSET randomElements
-	;call	displayArray
 
 
 	Invoke ExitProcess,0	; exit to operating system
@@ -101,18 +115,12 @@ main ENDP
 
 testProc PROC
 
-	PUSH	10
-	PUSH	OFFSET testArray
-	call	displayArray
-	call	CrLf
 
 	PUSH	OFFSET testArray
-	call	gnomeSort
-
-	PUSH	10
-	PUSH	OFFSET testArray
+	PUSH	ARRAYSIZE
 	call	displayArray
 
+	printTestArray
 RET
 testPROC ENDP
 
@@ -157,7 +165,13 @@ _lastArrayIndexToESI:
 		POP		EBX 
 	
 _iterateSortAlgorithm:
-	
+
+	PUSHAD
+	PUSH	ARRAYSIZE	
+	PUSH	OFFSET testArray
+	call	displayArray
+	call	CrlF
+	POPAD	
 	; ---------------------------------------------
 	; if ESI == 0: ESI += 4
 	; else: continue 
@@ -175,17 +189,16 @@ _iterateSortAlgorithm:
 		_cmpElementSizes:
 			MOV		EBX, [EDI]
 			CMP		[EAX], EBX
-			JLE	_incrmentIndex	
+			JLE		_incrmentIndex	
 
 		_swapElements:
 			PUSH	EAX
 			PUSH	EDI	
 			call	exchangeElements
-
+	
 			SUB		EDI, 4
 			JMP		_continue
 		_incrmentIndex:		
-
 			MOV		EAX, EDI
 			ADD		EDI, 4
 			MOV		EAX, EDI
@@ -267,38 +280,35 @@ displayArray PROC
 	MOV		EBP, ESP
 
 _loadArray:		
-	MOV		ESI, [EBP+12]				; [ESI] = inputArray
-	MOV		EDI, [EBP+16]				; EDI = LENGTHOF inputArray
+	MOV		ESI, [EBP+12]				; ESI = inputArrayOFFSET
+	MOV		EDX, [EBP+16]				; EDX = LENGTHOF inputArray
+
+	MOV		EAX, [EDX]
+	call	WriteDec
 
 
-; for(i=LENGTHOF inputArray; i > 0; i --) {
-	MOV		ECX, EDI
-_printElement:
-	MOV		EAX, [ESI]
-	call	WriteDec	
-	; print(' ')
-	MOV		EDX, OFFSET space
-	call	WriteString					
-	ADD		ESI, 4
-	INC		currentRowLength	
-_indentConditionally:	
-	; if currentRowLengthl < rowLength: JMP printElement 
-	; else: CrLf
-	MOV		EBX, currentRowLength 
-	CMP		EBX, ROW_LENGTH 
-	JNE		_continue	
-	call	CrlF
-; --------------------------
-; reset currentRowLength
-; --------------------------
+
+	MOV		EAX, ESI
+	MOV		inputArrayOFFSET, ESI
+	MOV		inputArrayLength, EDX	
+
+_loadLastArrayIndexEDI:
 	PUSH	EAX
-	MOV		EAX, 0
-	MOV		currentRowLength, EAX
-	POP		EAX
-
-_continue:
-	LOOP	_printElement
 	
+	MOV		EAX, inputArrayLength
+	MOV		EBX, 4
+	MUL		EBX
+
+	ADD		EAX, ESI 
+	MOV		ESI, EAX
+
+	POP		EAX 
+
+	MOV		EBX, ESI
+	ADD		EBX, 4
+	
+	printElement EBX
+
 	POP		EBP
 	POP		ESP
 	
@@ -313,15 +323,7 @@ exchangeElements PROC
 	MOV		ESI, [EBP+12]							; ESI = indexOne
 	MOV		EDI, [EBP+16]							; EDI = indexTwo
 
-	; tempValue = [indexOne]
-
-_useTemptsToSwitchElements:
-; [indexOne], [indexTwo] = [IndexTwo], [indexOne]
-	MOV		EAX, [EDI]
-	MOV		EBX, [ESI]
-	MOV		[ESI], EAX 
-	MOV		EAX, EBX 
-	MOV		[EDI], EAX
+	MOVSD					
 
 	POP		EBP
 	POP		ESP
