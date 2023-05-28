@@ -37,12 +37,34 @@ ENDM
 
 printElement MACRO element
 
-	MOV		EAX, [element]
+	MOV		EAX, element
 	call	WriteDec	
 
-	MOV		EDX, Space
+	MOV		EDX, OFFSET space
 	call	Writestring
 
+
+ENDM
+
+;-----------------------------------------------------------------
+; Name: printSpace
+; 
+; prints the element along with a space.
+; 
+; Preconditions: address of index is passed as an argument.
+;
+; recieves
+; indexAddress = address of index.
+;
+; returns: NA
+;-----------------------------------------------------------------
+
+printSpace MACRO 
+
+	PUSH	EDX
+	MOV		EDX, OFFSET space
+	call	Writestring
+	POP		EDX
 
 ENDM
 
@@ -51,13 +73,13 @@ ROW_LENGTH = 20
 ; fillArray PROC
 LO = 20
 HI = 30
-ARRAYSIZE = 9
+ARRAYSIZE = 100 
 
 ; (insert constant definitions here)
 
 .data
 
-testArray				DWORD		25, 2, 43, 23, 33, 33, 43, 21, 33 
+testArray				DWORD		ARRAYSIZE DUP(30)
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -69,7 +91,7 @@ rowLength				DWORD		20
 numberRows				DWORD		?
 space					DWORD		' ', 0
 inputArrayOFFSET		DWORD		?
-currentRowLength		DWORD		?
+currentRowLength		DWORD		1
 inputArrayLength		DWORD		?
 
 ; fillArray
@@ -124,7 +146,6 @@ testProc PROC
 	PUSH	ARRAYSIZE
 	call	displayArray
 
-	printTestArray
 RET
 testPROC ENDP
 
@@ -283,56 +304,29 @@ displayArray PROC
 	PUSH	EBP	
 	MOV		EBP, ESP
 
-_loadArray:		
+_loadArrayRequirements:		
 	MOV		ESI, [EBP+16]				; ESI = inputArrayOFFSET
-	MOV		EBX, [EBP+12]				; EBX = LENGTHOF inputArray
-		
-	MOV		inputArrayOFFSET, ESI
-	MOV		inputArrayLength, EBX
+	MOV		ECX, [EBP+12]				; ECX = number of elements	
+	MOV		EBX, ROW_LENGTH
+			
+_printIteratively:	
+	printElement [ESI]	
+	ADD		ESI, 4
 	
+	_createNewLineConditionally:
+		INC		currentRowLength
+		CMP		EBX, currentRowLength 
+		JGE		_loopPrint 
 
-_displayElement:
-
-
-
-	ADD ESI, 32
-	
-	PUSH	EAX 
-	MOV		EAX, [ESI]
-	call	WriteDec
-
-	POP		EAX
-
-	MOV		EAX, ESI
-	MOV		inputArrayOFFSET, ESI
-	MOV		inputArrayLength, EDX	
-
-_loadLastArrayIndexEDI:
-	PUSH	EAX
-	
-	MOV		EAX, inputArrayLength
-	MOV		EBX, 4
-	MUL		EBX
-
-	ADD		EAX, ESI 
-	MOV		ESI, EAX
-
-
-	POP		EAX 
-
-	MOV		EBX, ESI
-
-	PUSHAD	
-_printElement:
-	MOV		EAX, [ESI]
-	call	WriteDec
-	
-	MOV		EDX, space
-	call	WriteString
+		call	CrLf			
+		MOV		EDX, 1
+		MOV		currentRowLength, EDX
 
 	
-	POPAD
-
+	_loopPrint:
+	LOOP	_printIteratively
+	
+_displayElement:	
 	POP		EBP
 	POP		ESP
 	
