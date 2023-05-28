@@ -79,7 +79,7 @@ ARRAYSIZE = 16
 
 .data
 
-testArray				DWORD		12, 3, 34, 5, 2, 3, 43, 2, 2, 34, 2,2 ,3, 2,3, 34
+testArray				DWORD		12, 3, 34, 5, 7, 3, 43, 32,12 , 34, 2,2 ,3, 82,3, 34
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -135,9 +135,17 @@ main ENDP
 
 testProc PROC
 
+
 	PUSH	OFFSET testArray
 	PUSH	ARRAYSIZE
 	call	displayArray
+
+		
+	PUSH	OFFSET testArray
+	MOV		EBX, OFFSET testArray
+	ADD		EBX, 8
+	PUSH	EBX
+	call	exchangeElements
 
 	PUSH	OFFSET testArray
 	call	gnomeSort
@@ -186,17 +194,12 @@ _lastArrayIndexToESI:
 		MOV		EBX, EAX
 		ADD		ESI, EBX
 		MOV		lastArrayIndex, ESI
+		SUB		lastArrayIndex, 4
 
 		POP		EBX 
 	
 _iterateSortAlgorithm:
 
-	PUSHAD
-	PUSH	ARRAYSIZE	
-	PUSH	OFFSET testArray
-	call	displayArray
-	call	CrlF
-	POPAD	
 	; ---------------------------------------------
 	; if ESI == 0: ESI += 4
 	; else: continue 
@@ -217,9 +220,11 @@ _iterateSortAlgorithm:
 			JLE		_incrmentIndex	
 
 		_swapElements:
+			PUSHAD
 			PUSH	EAX
 			PUSH	EDI	
 			call	exchangeElements
+			POPAD
 	
 			SUB		EDI, 4
 			JMP		_continue
@@ -330,8 +335,8 @@ _printIteratively:
 	
 	_loopPrint:
 	LOOP	_printIteratively
-	
-_displayElement:
+
+_finish:	
 	call	CrlF
 	POP		EBP
 	POP		ESP
@@ -347,9 +352,19 @@ exchangeElements PROC
 	MOV		ESI, [EBP+12]							; ESI = indexOne
 	MOV		EDI, [EBP+16]							; EDI = indexTwo
 
-	STD
-	MOVSD	
-	SUB		EDI, 4
+		; tempValue = [indexOne]
+
+_useTemptsToSwitchElements:
+	PUSHAD
+
+; [indexOne], [indexTwo] = [IndexTwo], [indexOne]
+	MOV		EAX, [EDI]
+	MOV		EBX, [ESI]
+	MOV		[ESI], EAX 
+	MOV		EAX, EBX 
+	MOV		[EDI], EAX
+
+	POPAD
 
 	POP		EBP
 	POP		ESP
