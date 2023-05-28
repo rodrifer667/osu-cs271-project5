@@ -109,9 +109,6 @@ testProc PROC
 	PUSH	OFFSET testArray
 	call	gnomeSort
 
-	;;test
-
-
 	PUSH	10
 	PUSH	OFFSET testArray
 	call	displayArray
@@ -144,9 +141,6 @@ _accesArgument:
 
 _lastArrayIndexToESI:
 		MOV		ESI, originalArrayOFFSET
-		MOV		EAX, ESI
-		call	Writedec
-		call	CrlF
 		
 		PUSH	EBX 
 ;-------------------------------------------------
@@ -158,30 +152,21 @@ _lastArrayIndexToESI:
 		MUL		EBX 
 		MOV		EBX, EAX
 		ADD		ESI, EBX
-		
-		MOV		EAX, ESI
-		call WriteDec
-		call crlf
+		MOV		lastArrayIndex, ESI
 
 		POP		EBX 
-
-
 	
 _iterateSortAlgorithm:
-	PUSH	ARRAYSiZE
-	PUSH	originalArrayOFFSET	
-	call	displayArray
+	
 	; ---------------------------------------------
 	; if ESI == 0: ESI += 4
 	; else: continue 
 	; ---------------------------------------------
 	_incrementZeroIndex:
-		SUB		EDI, originalArrayOFFSET		; configuers address
-		CMP		EDI, 0
+		CMP		EDI, originalArrayOFFSET
 		JNE		_cmpTwinIndices	
 		ADD		EDI, 4
 	_cmpTwinIndices:
-		ADD		EDI, originalArrayOFFSET		; to compare to existing address
 		
 		_configureIndexDecrement:
 			MOV		EAX, EDI
@@ -190,7 +175,7 @@ _iterateSortAlgorithm:
 		_cmpElementSizes:
 			MOV		EBX, [EDI]
 			CMP		[EAX], EBX
-			JNLE	_incrmentIndex	
+			JLE	_incrmentIndex	
 
 		_swapElements:
 			PUSH	EAX
@@ -205,12 +190,13 @@ _iterateSortAlgorithm:
 			ADD		EDI, 4
 			MOV		EAX, EDI
 
+
 	_continue:
 		_cmpLastIndex:
 			; ----------------------------------------------
 			; if currenIndex < finalIndex: JMP _iterateSortAlgorithm 
 			; ----------------------------------------------
-			CMP		ESI, EDI
+			CMP		lastArrayIndex, EDI
 			JGE		_iterateSortAlgorithm
 
 	_finish:	
