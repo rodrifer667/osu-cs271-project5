@@ -73,7 +73,7 @@ ROW_LENGTH = 20
 ; fillArray PROC
 LO = 20
 HI = 30
-ARRAYSIZE = 16
+ARRAYSIZE =	200 
 
 ; (insert constant definitions here)
 
@@ -112,8 +112,7 @@ main PROC
 
 	call	Randomize
 	call	fillArray
-	call	testProc
-
+	call	testPROC
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -136,24 +135,13 @@ main ENDP
 testProc PROC
 
 
-	PUSH	OFFSET testArray
-	PUSH	ARRAYSIZE
-	call	displayArray
-
-		
-	PUSH	OFFSET testArray
-	MOV		EBX, OFFSET testArray
-	ADD		EBX, 8
-	PUSH	EBX
-	call	exchangeElements
-
-	PUSH	OFFSET testArray
+	PUSH	OFFSET randomElements
 	call	gnomeSort
 
-	PUSH	OFFSET testArray
+	PUSH	OFFSET randomElements
 	PUSH	ARRAYSIZE
 	call	displayArray
-
+	
 RET
 testPROC ENDP
 
@@ -320,7 +308,23 @@ _loadArrayRequirements:
 		
 			
 _printIteratively:	
-	printElement [ESI]	
+
+	PUSHAD
+
+	MOV		EAX, [ESI]
+	call	WriteDec	
+
+	MOV		EDX, OFFSET space
+	call	Writestring
+	
+	POPAD
+
+
+
+
+
+
+; 	printElement [ESI]	
 	ADD		ESI, 4
 	
 	_createNewLineConditionally:
