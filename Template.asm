@@ -35,16 +35,14 @@ ENDM
 ; returns: NA
 ;-----------------------------------------------------------------
 
-printElement MACRO addressIndex
-	PUSHAD 
+printElement MACRO element
 
-	MOV		EAX, [addressIndex]
+	MOV		EAX, [element]
 	call	WriteDec	
 
 	MOV		EDX, Space
 	call	Writestring
 
-	POPAD
 
 ENDM
 
@@ -115,6 +113,12 @@ main ENDP
 
 testProc PROC
 
+	MOV		EAX, OFFSET testArray
+	call	WriteDec
+	call	CrLf
+	MOV		EAX, ARRAYSIZE
+	call	WriteDec
+	Call	CrLf
 
 	PUSH	OFFSET testArray
 	PUSH	ARRAYSIZE
@@ -280,13 +284,24 @@ displayArray PROC
 	MOV		EBP, ESP
 
 _loadArray:		
-	MOV		ESI, [EBP+12]				; ESI = inputArrayOFFSET
-	MOV		EDX, [EBP+16]				; EDX = LENGTHOF inputArray
+	MOV		ESI, [EBP+16]				; ESI = inputArrayOFFSET
+	MOV		EBX, [EBP+12]				; EBX = LENGTHOF inputArray
+		
+	MOV		inputArrayOFFSET, ESI
+	MOV		inputArrayLength, EBX
+	
 
-	MOV		EAX, [EDX]
+_displayElement:
+
+
+
+	ADD ESI, 32
+	
+	PUSH	EAX 
+	MOV		EAX, [ESI]
 	call	WriteDec
 
-
+	POP		EAX
 
 	MOV		EAX, ESI
 	MOV		inputArrayOFFSET, ESI
@@ -302,12 +317,21 @@ _loadLastArrayIndexEDI:
 	ADD		EAX, ESI 
 	MOV		ESI, EAX
 
+
 	POP		EAX 
 
 	MOV		EBX, ESI
-	ADD		EBX, 4
+
+	PUSHAD	
+_printElement:
+	MOV		EAX, [ESI]
+	call	WriteDec
 	
-	printElement EBX
+	MOV		EDX, space
+	call	WriteString
+
+	
+	POPAD
 
 	POP		EBP
 	POP		ESP
