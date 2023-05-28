@@ -73,13 +73,13 @@ ROW_LENGTH = 20
 ; fillArray PROC
 LO = 20
 HI = 30
-ARRAYSIZE = 100 
+ARRAYSIZE = 16
 
 ; (insert constant definitions here)
 
 .data
 
-testArray				DWORD		ARRAYSIZE DUP(30)
+testArray				DWORD		12, 3, 34, 5, 2, 3, 43, 2, 2, 34, 2,2 ,3, 2,3, 34
 testArrayLength		    DWORD       LENGTHOF testArray  
 rowIndex				DWORD		?	
 no						BYTE		"No", 0
@@ -134,13 +134,6 @@ main ENDP
 ; ---------------------------------------------------------------------------------
 
 testProc PROC
-
-	MOV		EAX, OFFSET testArray
-	call	WriteDec
-	call	CrLf
-	MOV		EAX, ARRAYSIZE
-	call	WriteDec
-	Call	CrLf
 
 	PUSH	OFFSET testArray
 	PUSH	ARRAYSIZE
