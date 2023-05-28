@@ -139,6 +139,13 @@ testProc PROC
 	PUSH	ARRAYSIZE
 	call	displayArray
 
+	PUSH	OFFSET testArray
+	call	gnomeSort
+
+	PUSH	OFFSET testArray
+	PUSH	ARRAYSIZE
+	call	displayArray
+
 RET
 testPROC ENDP
 
@@ -300,7 +307,12 @@ displayArray PROC
 _loadArrayRequirements:		
 	MOV		ESI, [EBP+16]				; ESI = inputArrayOFFSET
 	MOV		ECX, [EBP+12]				; ECX = number of elements	
-	MOV		EBX, ROW_LENGTH
+	MOV		EBX, ROW_LENGTH	
+
+	MOV		EDX, 1
+	MOV		currentRowLength, EDX
+
+		
 			
 _printIteratively:	
 	printElement [ESI]	
@@ -319,7 +331,8 @@ _printIteratively:
 	_loopPrint:
 	LOOP	_printIteratively
 	
-_displayElement:	
+_displayElement:
+	call	CrlF
 	POP		EBP
 	POP		ESP
 	
