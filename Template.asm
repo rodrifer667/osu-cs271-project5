@@ -347,7 +347,9 @@ exchangeElements PROC
 	MOV		ESI, [EBP+12]							; ESI = indexOne
 	MOV		EDI, [EBP+16]							; EDI = indexTwo
 
-	MOVSD					
+	STD
+	MOVSD	
+	SUB		EDI, 4
 
 	POP		EBP
 	POP		ESP

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 09:02:30
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 09:06:44
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -392,15 +392,17 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 09:02:30
  0000012D  8B 75 0C			MOV		ESI, [EBP+12]							; ESI = indexOne
  00000130  8B 7D 10			MOV		EDI, [EBP+16]							; EDI = indexTwo
 
- 00000133  A5				MOVSD					
+ 00000133  FD				STD
+ 00000134  A5				MOVSD	
+ 00000135  83 EF 04			SUB		EDI, 4
 
- 00000134  5D				POP		EBP
- 00000135  5C				POP		ESP
- 00000136  C2 0008		RET	8
- 00000139			exchangeElements ENDP
+ 00000138  5D				POP		EBP
+ 00000139  5C				POP		ESP
+ 0000013A  C2 0008		RET	8
+ 0000013D			exchangeElements ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 09:02:30
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 09:06:44
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -504,7 +506,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 000000BF Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000139 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000013D Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -617,7 +619,7 @@ displayArray . . . . . . . . . .	P Near	 000000D1 _TEXT	Length= 00000058 Public 
   _createNewLineConditionally  .	L Near	 000000FF _TEXT	
   _loopPrint . . . . . . . . . .	L Near	 0000011D _TEXT	
   _displayElement  . . . . . . .	L Near	 0000011F _TEXT	
-exchangeElements . . . . . . . .	P Near	 00000129 _TEXT	Length= 00000010 Public STDCALL
+exchangeElements . . . . . . . .	P Near	 00000129 _TEXT	Length= 00000014 Public STDCALL
 fillArray  . . . . . . . . . . .	P Near	 000000AF _TEXT	Length= 00000022 Public STDCALL
   _appendElements  . . . . . . .	L Near	 000000B9 _TEXT	
   _getRandomNumber . . . . . . .	L Near	 000000B9 _TEXT	
