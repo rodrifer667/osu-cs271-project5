@@ -116,6 +116,8 @@ printSpace MACRO
 
 ENDM
 
+
+
 printSortedArray MACRO inputArray
 
 	ARRAYSIZE = 200
@@ -212,6 +214,8 @@ _displayMedian:
 
 _displayFrequencies:
 	PUSH	OFFSET randomElements
+	MOV		EAX, OFFSET randomElements
+	call	WriteDec
 	PUSH	OFFSET elFrequencies
 	call	countList
 
@@ -533,26 +537,41 @@ _accessBasePointer:
 
 _initializeVariables:
 	MOV		EDI, [EBP+12]							
-	MOV		ESI, [EBP+16]		
+	MOV		ESI, [EBP+16]	
 	MOV		elFrequenciesOFFSET, EDI
 	MOV		randomElOFFSET, ESI 	
 
-	sourceElementToEAX
+	MOV		EAX, [ESI]
+	ADD		ESI, 4
+
+
+	MOV		EBX, [ESI]
+	MOV		currEl, EBX
 	
 ;-------------------------------------------------------
 ; iterate throug the random array to count the array frequencies.
 ;-------------------------------------------------------
-	MOV		ECX, ARRAYSIZE
-	CLD
+
 _annotateFrequency:
-	call	WriteDec
-	MOV		EAX, currEl
-
-	SCASD	
-	LODSD
-
+	CMP		EAX, currEl	
+	JE		_incrementCurrFrequency
+		
+	_resetCurrFrequencyCount:
+		call WriteDec
+		MOV		currEl, EAX
+		JMP		_continue
+	_incrementCurrFrequency:
+	_continue:
+	ADD		ESI, 4
+	MOV		EAX, [ESI]
 	printSpace
-	LOOP	_annotateFrequency
+
+	;---------------------------------------------------
+	; continue while end array not reached.
+	;---------------------------------------------------
+	CMP		ESI, lastArrayIndex
+	JL		_annotateFrequency	
+
 	
 _finish:
 	POP		EBP
