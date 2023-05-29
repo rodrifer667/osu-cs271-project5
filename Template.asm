@@ -209,7 +209,7 @@ medianOFFSET			DWORD		?
 medianElement			DWORD		? 
 
 ; countList		
-elFrequencies			DWORD		ARRAYSIZE DUP(?)
+counts			DWORD		ARRAYSIZE DUP(?)
 elFrequenciesLength		DWORD		?
 elFrequenciesOFFSET		DWORD		?
 currElFrequencies		DWORD		1
@@ -218,12 +218,30 @@ currEl					DWORD		?
 randomElOFFSET			DWORD		?
 currElFrequency			DWORD		?
 
+; procName
+procTitle				BYTE		"Generating, Sorting, and Counting Random Integers!					By Feranndo I Rodriguez-Estrada", 0
+programInstructions		BYTE		"This porgram generates a list of 200 random integers between 15 and 50, inclusive. It then displays the orginal", 
+									" list, sorts the list, displays the median of the list, displays the list sorted in ascending order, and finally displays the number of instances of each generated value, starting with the number of lowest."
+
+; titles
+unsortedTitle			BYTE		"Your unsorted random number: ", 0
+sortedTitle				BYTE		"Your sorted randome numbers: ", 0
+instancesTitle			BYTE		"Your list of indances of each generated number, starting with the smallest value:", 13, 10, 13, 10, 0
+goodBye					BYTE		"Goodbye, and thanks for using my program!", 0
+
 .code
 main PROC
+
+	call	introduction	
 
 _getRandomArray:
 	call	Randomize
 	call	fillArray
+
+_displayRandomArrayTitle:
+	MOV		EDX, OFFSET unsortedTitle
+	call	WriteString
+	call	CrlF
 	
 _displayRandomArray:
 	PUSH	OFFSET randomElements
@@ -234,6 +252,10 @@ _sortRandomArray:
 	PUSH	OFFSET randomElements
 	call	gnomeSort
 
+_displaySortedTitle:
+	MOV		EDX, OFFSET sortedTitle
+	call	WriteString
+	call	CrlF
 _displaySortedArray:	
 	PUSH	OFFSET randomElements
 	PUSH	ARRAYSIZE
@@ -245,7 +267,7 @@ _displayMedian:
 
 _displayFrequencies:
 	PUSH	OFFSET randomElements
-	PUSH	OFFSET elFrequencies
+	PUSH	OFFSET counts
 	call	countList
 
 _displayFreqencyArar:
@@ -253,12 +275,10 @@ _displayFreqencyArar:
 	PUSH	11
 	call	displayArray
 
-
-;call	testPROC
-; 	PUSH	OFFSET elementFrequencies	
-; 	MOV		EBX, OFFSET elementFrequencies
-;	call	countList	
-
+_displayGoodByeMessage:
+	MOV		EDX, OFFSET goodBye
+	call	WriteString
+	
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -282,11 +302,40 @@ testProc PROC
 
 _displayFrequencies:
 	PUSH	OFFSET randomElements
-	PUSH	OFFSET elFrequencies
+	PUSH	OFFSET counts
 	call	countList
 
 RET
 testPROC ENDP
+
+; ---------------------------------------------------------------------------------
+; Name: procedureName
+;
+; Description:
+;
+; Preconditions:
+;
+; Postconditions:
+;
+; Returns:
+;
+; ---------------------------------------------------------------------------------
+
+introduction PROC
+
+	MOV		EDX, OFFSET procTitle
+	call	WriteString
+	call	CrlF
+	call	CrlF
+
+	MOV		EDX, OFFSET programInstructions
+	call	WriteString
+	call	CrlF
+	call	CrlF
+
+RET
+introduction ENDP
+
 
 ; ---------------------------------------------------------------------------------
 
@@ -565,6 +614,12 @@ RET 8
 displayMedian ENDP
 
 countList PROC
+
+_displayCountTitle:
+	call	CrlF
+	MOV		EDX, OFFSET instancesTitle
+	call	WriteString
+	
 _accessBasePointer:
 	PUSH	ESP
 	PUSH	EBP
@@ -601,8 +656,6 @@ _annotateFrequency:
 
 			POP EBX
 			ADD EDI, 4
- 		printNum	currElFrequency
-		printSpace
 		setZero		currElFrequency
 		MOV		currEl, EAX
 		JMP		_continue
@@ -626,8 +679,6 @@ _appendLastElFrequency:
 			MOV	DWORD PTR [EDI], EBX
 			POP	EBX
 
-
-	printNum	currElFrequency	
 	
 _finish:
 	POP		EBP
