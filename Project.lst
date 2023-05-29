@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:39:00
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -29,6 +29,14 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
 			      C .NOLIST
 			      C .LIST
 			      C 
+
+				printNum MACRO num
+					PUSH	EAX
+					MOV		EAX, num
+					call	WriteDec	
+					POP		EAX 
+
+				ENDM
 
 				;-----------------------------------------------------------------
 				; Name: sourceElToEAX 
@@ -89,6 +97,29 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
 					call	CrlF
 
 					POPAD
+				ENDM
+
+
+				;-----------------------------------------------------------------
+				; Name: setZero
+				;
+				; sets the input to zero.
+				; 
+				; Preconditions: desired zero is passed as an argument.
+				;
+				; recieves
+				; num = number to set to zero.
+				;
+				; returns: NA
+				;-----------------------------------------------------------------
+
+				setZero MACRO num 
+
+					PUSH	EBX
+					MOV		EBX, 0	
+					MOV		num, EBX
+					POP		EBX
+					
 				ENDM
 
 				;-----------------------------------------------------------------
@@ -226,7 +257,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
  000006D3 00000001		currIndex				DWORD		1
  000006D7 00000000		currEl					DWORD		?
  000006DB 00000000		randomElOFFSET			DWORD		?
-
+ 000006DF 00000000		currElFrequency			DWORD		?
 
  00000000			.code
  00000000			main PROC
@@ -566,8 +597,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
  0000019D  A3 000003A3 R		MOV		medianElement, EAX
 
 					printMedian medianElement
- 000006DF		     1		  .data
- 000006DF 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
+ 000006E3		     1		  .data
+ 000006E3 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
 	   65 64 69 61 6E
 	   20 76 61 6C 75
 	   65 20 6F 66 20
@@ -576,7 +607,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
 	   20 00
  000001A2		     1	      .code
  000001A2		     1	_printMedianMessage:
- 000001A2  BA 000006DF R     1		MOV		EDX, OFFSET MedianMessage
+ 000001A2  BA 000006E3 R     1		MOV		EDX, OFFSET MedianMessage
  000001A7  E8 00000000 E     1		call	WriteString
  000001AC		     1	_printMedian:
  000001AC  A1 000003A3 R     1		MOV		EAX, medianElement
@@ -600,51 +631,77 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
  000001C7  8B 75 10			MOV		ESI, [EBP+16]	
  000001CA  89 3D 000006CB R		MOV		elFrequenciesOFFSET, EDI
  000001D0  89 35 000006DB R		MOV		randomElOFFSET, ESI 	
+ 000001D6  C7 05 000006DF R		MOV		currElFrequency, 0
+	   00000000
 
- 000001D6  8B 06			MOV		EAX, [ESI]
- 000001D8  83 C6 04			ADD		ESI, 4
+ 000001E0  8B 06			MOV		EAX, [ESI]
+ 000001E2  83 C6 04			ADD		ESI, 4
 
 
- 000001DB  8B 1E			MOV		EBX, [ESI]
- 000001DD  89 1D 000006D7 R		MOV		currEl, EBX
+ 000001E5  8B 1E			MOV		EBX, [ESI]
+ 000001E7  89 1D 000006D7 R		MOV		currEl, EBX
 					
 				;-------------------------------------------------------
 				; iterate throug the random array to count the array frequencies.
 				;-------------------------------------------------------
 
- 000001E3			_annotateFrequency:
- 000001E3  3B 05 000006D7 R		CMP		EAX, currEl	
- 000001E9  74 0C			JE		_incrementCurrFrequency
+ 000001ED			_annotateFrequency:
+ 000001ED  3B 05 000006D7 R		CMP		EAX, currEl	
+ 000001F3  74 38			JE		_incrementCurrFrequency
 						
- 000001EB				_resetCurrFrequencyCount:
- 000001EB  E8 00000000 E			call WriteDec
- 000001F0  A3 000006D7 R			MOV		currEl, EAX
- 000001F5  EB 00				JMP		_continue
- 000001F7				_incrementCurrFrequency:
- 000001F7				_continue:
- 000001F7  83 C6 04			ADD		ESI, 4
- 000001FA  8B 06			MOV		EAX, [ESI]
+ 000001F5				_resetCurrFrequencyCount:
+						printNum	currElFrequency
+ 000001F5  50		     1		PUSH	EAX
+ 000001F6  A1 000006DF R     1		MOV		EAX, currElFrequency
+ 000001FB  E8 00000000 E     1		call	WriteDec	
+ 00000200  58		     1		POP		EAX 
+						printSpace
+ 00000201  52		     1		PUSH	EDX
+ 00000202  BA 00000057 R     1		MOV		EDX, OFFSET space
+ 00000207  E8 00000000 E     1		call	Writestring
+ 0000020C  5A		     1		POP		EDX
+						printNum	currEl
+ 0000020D  50		     1		PUSH	EAX
+ 0000020E  A1 000006D7 R     1		MOV		EAX, currEl
+ 00000213  E8 00000000 E     1		call	WriteDec	
+ 00000218  58		     1		POP		EAX 
+						setZero		currElFrequency, 0
+			     1	
+Template.asm(595) : warning A4006:too many arguments in macro call
+ setZero(1): Macro Called From
+  Template.asm(595): Main Line Code
+ 00000219  53		     1		PUSH	EBX
+ 0000021A  BB 00000000	     1		MOV		EBX, 0	
+ 0000021F  89 1D 000006DF R  1		MOV		currElFrequency, EBX
+ 00000225  5B		     1		POP		EBX
+ 00000226  A3 000006D7 R			MOV		currEl, EAX
+ 0000022B  EB 06				JMP		_continue
+ 0000022D				_incrementCurrFrequency:
+ 0000022D  FF 05 000006DF R			INC		currElFrequency
+ 00000233				_continue:
+ 00000233  83 C6 04			ADD		ESI, 4
+ 00000236  8B 06			MOV		EAX, [ESI]
 					printSpace
- 000001FC  52		     1		PUSH	EDX
- 000001FD  BA 00000057 R     1		MOV		EDX, OFFSET space
- 00000202  E8 00000000 E     1		call	Writestring
- 00000207  5A		     1		POP		EDX
+ 00000238  52		     1		PUSH	EDX
+ 00000239  BA 00000057 R     1		MOV		EDX, OFFSET space
+ 0000023E  E8 00000000 E     1		call	Writestring
+ 00000243  5A		     1		POP		EDX
 
 					;---------------------------------------------------
 					; continue while end array not reached.
 					;---------------------------------------------------
- 00000208  3B 35 0000039B R		CMP		ESI, lastArrayIndex
- 0000020E  7C D3			JL		_annotateFrequency	
+ 00000244  3B 35 0000039B R		CMP		ESI, lastArrayIndex
+ 0000024A  7C A1			JL		_annotateFrequency	
 
 					
- 00000210			_finish:
- 00000210  5D				POP		EBP
- 00000211  5C				POP		ESP
- 00000212  C2 0008		RET 8	
- 00000215			countList ENDP
+ 0000024C			_finish:
+ 0000024C  5D				POP		EBP
+ 0000024D  5C				POP		ESP
+ 0000024E  C2 0008		RET 8	
+ 00000251			countList ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:07:48
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 21:39:00
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -656,9 +713,11 @@ Macros:
 
 printElement . . . . . . . . . .	Proc
 printMedian  . . . . . . . . . .	Proc
+printNum . . . . . . . . . . . .	Proc
 printSortedArray . . . . . . . .	Proc
 printSpace . . . . . . . . . . .	Proc
 printTestArray . . . . . . . . .	Proc
+setZero  . . . . . . . . . . . .	Proc
 sourceElementToEAX . . . . . . .	Proc
 
 
@@ -750,8 +809,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000006FF Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000215 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000703 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000251 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -858,14 +917,14 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-countList  . . . . . . . . . . .	P Near	 000001C0 _TEXT	Length= 00000055 Public STDCALL
+countList  . . . . . . . . . . .	P Near	 000001C0 _TEXT	Length= 00000091 Public STDCALL
   _accessBasePointer . . . . . .	L Near	 000001C0 _TEXT	
   _initializeVariables . . . . .	L Near	 000001C4 _TEXT	
-  _annotateFrequency . . . . . .	L Near	 000001E3 _TEXT	
-  _resetCurrFrequencyCount . . .	L Near	 000001EB _TEXT	
-  _incrementCurrFrequency  . . .	L Near	 000001F7 _TEXT	
-  _continue  . . . . . . . . . .	L Near	 000001F7 _TEXT	
-  _finish  . . . . . . . . . . .	L Near	 00000210 _TEXT	
+  _annotateFrequency . . . . . .	L Near	 000001ED _TEXT	
+  _resetCurrFrequencyCount . . .	L Near	 000001F5 _TEXT	
+  _incrementCurrFrequency  . . .	L Near	 0000022D _TEXT	
+  _continue  . . . . . . . . . .	L Near	 00000233 _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 0000024C _TEXT	
 displayArray . . . . . . . . . .	P Near	 000000FA _TEXT	Length= 0000005A Public STDCALL
   _loadArrayRequirements . . . .	L Near	 000000FE _TEXT	
   _printIteratively  . . . . . .	L Near	 00000114 _TEXT	
@@ -1026,7 +1085,7 @@ MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
-MedianMessage  . . . . . . . . .	Byte	 000006DF _DATA	
+MedianMessage  . . . . . . . . .	Byte	 000006E3 _DATA	
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
@@ -1133,6 +1192,7 @@ black  . . . . . . . . . . . . .	Number	 00000000h
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
 currElFrequencies  . . . . . . .	DWord	 000006CF _DATA	
+currElFrequency  . . . . . . . .	DWord	 000006DF _DATA	
 currEl . . . . . . . . . . . . .	DWord	 000006D7 _DATA	
 currIndex  . . . . . . . . . . .	DWord	 000006D3 _DATA	
 currentRowLength . . . . . . . .	DWord	 00000063 _DATA	
@@ -1174,5 +1234,5 @@ wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
 yes  . . . . . . . . . . . . . .	Byte	 0000004B _DATA	
 
-	   0 Warnings
+	   1 Warnings
 	   0 Errors

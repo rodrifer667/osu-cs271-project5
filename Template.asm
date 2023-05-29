@@ -9,6 +9,14 @@ TITLE Program Template     (template.asm)
 
 INCLUDE Irvine32.inc
 
+printNum MACRO num
+	PUSH	EAX
+	MOV		EAX, num
+	call	WriteDec	
+	POP		EAX 
+
+ENDM
+
 ;-----------------------------------------------------------------
 ; Name: sourceElToEAX 
 ; 
@@ -68,6 +76,29 @@ printTestArray MACRO
 	call	CrlF
 
 	POPAD
+ENDM
+
+
+;-----------------------------------------------------------------
+; Name: setZero
+;
+; sets the input to zero.
+; 
+; Preconditions: desired zero is passed as an argument.
+;
+; recieves
+; num = number to set to zero.
+;
+; returns: NA
+;-----------------------------------------------------------------
+
+setZero MACRO num 
+
+	PUSH	EBX
+	MOV		EBX, 0	
+	MOV		num, EBX
+	POP		EBX
+	
 ENDM
 
 ;-----------------------------------------------------------------
@@ -185,7 +216,7 @@ currElFrequencies		DWORD		1
 currIndex				DWORD		1
 currEl					DWORD		?
 randomElOFFSET			DWORD		?
-
+currElFrequency			DWORD		?
 
 .code
 main PROC
@@ -540,6 +571,7 @@ _initializeVariables:
 	MOV		ESI, [EBP+16]	
 	MOV		elFrequenciesOFFSET, EDI
 	MOV		randomElOFFSET, ESI 	
+	MOV		currElFrequency, 0
 
 	MOV		EAX, [ESI]
 	ADD		ESI, 4
@@ -557,10 +589,14 @@ _annotateFrequency:
 	JE		_incrementCurrFrequency
 		
 	_resetCurrFrequencyCount:
-		call WriteDec
+		printNum	currElFrequency
+		printSpace
+		printNum	currEl
+		setZero		currElFrequency, 0
 		MOV		currEl, EAX
 		JMP		_continue
 	_incrementCurrFrequency:
+		INC		currElFrequency
 	_continue:
 	ADD		ESI, 4
 	MOV		EAX, [ESI]
