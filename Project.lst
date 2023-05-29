@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 19:22:48
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -30,6 +30,25 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 			      C .LIST
 			      C 
 
+				;-----------------------------------------------------------------
+				; Name: sourceElToEAX 
+				; 
+				; Moves element held in the first index of random array into EAX
+				; 
+				; Preconditions: NA
+				;
+				; recieves: NA
+
+				; returns: currEl
+				;-----------------------------------------------------------------
+
+				sourceElementToEAX MACRO median
+					MOV		EAX, [ESI]
+					MOV		currEl, EAX
+
+				ENDM
+
+
 				; MACROS
 
 				;-----------------------------------------------------------------
@@ -57,6 +76,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 				_printMedian:
 					MOV		EAX, median
 					call	WriteDec
+					call	CrlF
 
 				ENDM
 
@@ -195,7 +215,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
  000003A3 00000000		medianElement			DWORD		? 
 
 				; countList		
- 000003A7  000000C8 [		elementFrequencies		DWORD		ARRAYSIZE DUP(?)
+ 000003A7  000000C8 [		elFrequencies			DWORD		ARRAYSIZE DUP(?)
 	    00000000
 	   ]
  000006C7 00000000		elFrequenciesLength		DWORD		?
@@ -203,6 +223,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
  000006CF 00000001		currElFrequencies		DWORD		1
  000006D3 00000001		currIndex				DWORD		1
  000006D7 00000000		currEl					DWORD		?
+ 000006DB 00000000		randomElOFFSET			DWORD		?
 
 
  00000000			.code
@@ -232,8 +253,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 
  0000003C			_displayFrequencies:
  0000003C  68 0000006B R		PUSH	OFFSET randomElements
- 00000041  68 000003A7 R		PUSH	OFFSET elementFrequencies	
- 00000046  E8 00000166			call	countList
+ 00000041  68 000003A7 R		PUSH	OFFSET elFrequencies
+ 00000046  E8 0000016B			call	countList
 
 				;call	testPROC
 				; 	PUSH	OFFSET elementFrequencies	
@@ -265,8 +286,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 
  00000052			_displayFrequencies:
  00000052  68 0000006B R		PUSH	OFFSET randomElements
- 00000057  68 000003A7 R		PUSH	OFFSET elementFrequencies	
- 0000005C  E8 00000150			call	countList
+ 00000057  68 000003A7 R		PUSH	OFFSET elFrequencies
+ 0000005C  E8 00000155			call	countList
 
  00000061  C3			RET
  00000062			testPROC ENDP
@@ -541,8 +562,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
  00000193  A3 000003A3 R		MOV		medianElement, EAX
 
 					printMedian medianElement
- 000006DB		     1		  .data
- 000006DB 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
+ 000006DF		     1		  .data
+ 000006DF 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
 	   65 64 69 61 6E
 	   20 76 61 6C 75
 	   65 20 6F 66 20
@@ -551,57 +572,62 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 	   20 00
  00000198		     1	      .code
  00000198		     1	_printMedianMessage:
- 00000198  BA 000006DB R     1		MOV		EDX, OFFSET MedianMessage
+ 00000198  BA 000006DF R     1		MOV		EDX, OFFSET MedianMessage
  0000019D  E8 00000000 E     1		call	WriteString
  000001A2		     1	_printMedian:
  000001A2  A1 000003A3 R     1		MOV		EAX, medianElement
  000001A7  E8 00000000 E     1		call	WriteDec
+ 000001AC  E8 00000000 E     1		call	CrlF
 
+ 000001B1			_finsh:
+ 000001B1  5D				POP		EBP
+ 000001B2  5C				POP		ESP
+ 000001B3  C2 0008		RET 8
+ 000001B6			displayMedian ENDP
 
- 000001AC			_finsh:
- 000001AC  5D				POP		EBP
- 000001AD  5C				POP		ESP
- 000001AE  C2 0008		RET 8
- 000001B1			displayMedian ENDP
+ 000001B6			countList PROC
+ 000001B6			_accessBasePointer:
+ 000001B6  54				PUSH	ESP
+ 000001B7  55				PUSH	EBP
+ 000001B8  8B EC			MOV		EBP, ESP
 
- 000001B1			countList PROC
- 000001B1			_accessBasePointer:
- 000001B1  54				PUSH	ESP
- 000001B2  55				PUSH	EBP
- 000001B3  8B 2C 24			MOV		EBP, [ESP]
+ 000001BA			_initializeVariables:
+ 000001BA  8B 7D 0C			MOV		EDI, [EBP+12]							
+ 000001BD  8B 75 10			MOV		ESI, [EBP+16]		
+ 000001C0  89 3D 000006CB R		MOV		elFrequenciesOFFSET, EDI
+ 000001C6  89 35 000006DB R		MOV		randomElOFFSET, ESI 	
 
- 000001B6			_initializeVariables:
- 000001B6  8B 55 0C			MOV		EDX, [EBP+12]							
- 000001B9  8B 5D 10			MOV		EBX, [EBP+16]		
- 000001BC  89 15 000006CB R		MOV		elFrequenciesOFFSET, EDX
-					MOV		randomElementsOFFSET, EBX 	
-Template.asm(518) : error A2006:undefined symbol : randomElementsOFFSET
-
- 000001C2  A1 000006CB R		MOV		EAX, elFrequenciesOFFSET
- 000001C7  E8 00000000 E		call	writeDec
- 000001CC  E8 00000000 E		call	crlf
-
- 000001D1  A1 000006D7 R		MOV		EAX, currEl
- 000001D6  E8 00000000 E		call	WriteDec
- 000001DB  E8 00000000 E		call	crlf
-						
+					sourceElementToEAX
+ 000001CC  8B 06	     1		MOV		EAX, [ESI]
+ 000001CE  A3 000006D7 R     1		MOV		currEl, EAX
+					
 				;-------------------------------------------------------
 				; iterate throug the random array to count the array frequencies.
 				;-------------------------------------------------------
-				;	MOV		ECX, ARRAYSIZE
- 000001EB			_annotateFrequency:
-				;	MOV		EAX, elFrequenciesOFFSET	
-				; 	call	WriteDec
-				;	LOOP	_annotateFrequency
+ 000001D3  B9 000000C8			MOV		ECX, ARRAYSIZE
+ 000001D8  FC				CLD
+ 000001D9			_annotateFrequency:
+ 000001D9  E8 00000000 E		call	WriteDec
+ 000001DE  A1 000006D7 R		MOV		EAX, currEl
+
+ 000001E3  AF				SCASD	
+ 000001E4  AD				LODSD
+
+					printSpace
+ 000001E5  52		     1		PUSH	EDX
+ 000001E6  BA 00000057 R     1		MOV		EDX, OFFSET space
+ 000001EB  E8 00000000 E     1		call	Writestring
+ 000001F0  5A		     1		POP		EDX
+ 000001F1  E2 E6			LOOP	_annotateFrequency
 					
- 000001EB			_finish:
- 000001EB  5D				POP		EBP
- 000001EC  5C				POP		ESP
- 000001ED  C2 0008		RET 8	
- 000001F0			countList ENDP
+ 000001F3			_finish:
+ 000001F3  5D				POP		EBP
+ 000001F4  5C				POP		ESP
+ 000001F5  C2 0008		RET 8	
+ 000001F8			countList ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 19:22:48
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -616,6 +642,7 @@ printMedian  . . . . . . . . . .	Proc
 printSortedArray . . . . . . . .	Proc
 printSpace . . . . . . . . . . .	Proc
 printTestArray . . . . . . . . .	Proc
+sourceElementToEAX . . . . . . .	Proc
 
 
 Structures and Unions:
@@ -706,8 +733,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000006FB Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F0 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000006FF Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F8 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -814,22 +841,22 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-countList  . . . . . . . . . . .	P Near	 000001B1 _TEXT	Length= 0000003F Public STDCALL
-  _accessBasePointer . . . . . .	L Near	 000001B1 _TEXT	
-  _initializeVariables . . . . .	L Near	 000001B6 _TEXT	
-  _annotateFrequency . . . . . .	L Near	 000001EB _TEXT	
-  _finish  . . . . . . . . . . .	L Near	 000001EB _TEXT	
+countList  . . . . . . . . . . .	P Near	 000001B6 _TEXT	Length= 00000042 Public STDCALL
+  _accessBasePointer . . . . . .	L Near	 000001B6 _TEXT	
+  _initializeVariables . . . . .	L Near	 000001BA _TEXT	
+  _annotateFrequency . . . . . .	L Near	 000001D9 _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 000001F3 _TEXT	
 displayArray . . . . . . . . . .	P Near	 000000F0 _TEXT	Length= 0000005A Public STDCALL
   _loadArrayRequirements . . . .	L Near	 000000F4 _TEXT	
   _printIteratively  . . . . . .	L Near	 0000010A _TEXT	
   _createNewLineConditionally  .	L Near	 00000120 _TEXT	
   _loopPrint . . . . . . . . . .	L Near	 0000013E _TEXT	
   _finish  . . . . . . . . . . .	L Near	 00000140 _TEXT	
-displayMedian  . . . . . . . . .	P Near	 00000165 _TEXT	Length= 0000004C Public STDCALL
+displayMedian  . . . . . . . . .	P Near	 00000165 _TEXT	Length= 00000051 Public STDCALL
   _divideARRAYSIZEbyTwoFlored  .	L Near	 00000173 _TEXT	
   _printMedianMessage  . . . . .	L Near	 00000198 _TEXT	
   _printMedian . . . . . . . . .	L Near	 000001A2 _TEXT	
-  _finsh . . . . . . . . . . . .	L Near	 000001AC _TEXT	
+  _finsh . . . . . . . . . . . .	L Near	 000001B1 _TEXT	
 exchangeElements . . . . . . . .	P Near	 0000014A _TEXT	Length= 0000001B Public STDCALL
   _useTemptsToSwitchElements . .	L Near	 00000154 _TEXT	
 fillArray  . . . . . . . . . . .	P Near	 000000CE _TEXT	Length= 00000022 Public STDCALL
@@ -979,7 +1006,7 @@ MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
-MedianMessage  . . . . . . . . .	Byte	 000006DB _DATA	
+MedianMessage  . . . . . . . . .	Byte	 000006DF _DATA	
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
@@ -1092,7 +1119,7 @@ currentRowLength . . . . . . . .	DWord	 00000063 _DATA
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 elFrequenciesLength  . . . . . .	DWord	 000006C7 _DATA	
 elFrequenciesOFFSET  . . . . . .	DWord	 000006CB _DATA	
-elementFrequencies . . . . . . .	DWord	 000003A7 _DATA	
+elFrequencies  . . . . . . . . .	DWord	 000003A7 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
@@ -1111,6 +1138,7 @@ medianOFFSET . . . . . . . . . .	DWord	 0000039F _DATA
 no . . . . . . . . . . . . . . .	Byte	 00000048 _DATA	
 numberRows . . . . . . . . . . .	DWord	 00000053 _DATA	
 originalArrayOFFSET  . . . . . .	DWord	 00000397 _DATA	
+randomElOFFSET . . . . . . . . .	DWord	 000006DB _DATA	
 randomElementsIndex  . . . . . .	DWord	 0000038B _DATA	
 randomElements . . . . . . . . .	DWord	 0000006B _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
@@ -1127,4 +1155,4 @@ yellow . . . . . . . . . . . . .	Number	 0000000Eh
 yes  . . . . . . . . . . . . . .	Byte	 0000004B _DATA	
 
 	   0 Warnings
-	   1 Errors
+	   0 Errors

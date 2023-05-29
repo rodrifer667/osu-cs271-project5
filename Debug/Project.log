@@ -1,3 +1,2 @@
 ﻿  Assembling Template.asm...
-Template.asm(518): error A2006: undefined symbol : randomElementsOFFSET
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations\masm.targets(70,5): error MSB3721: The command "ml.exe /c /nologo /Sg /Zi /Fo"Debug\Template.obj" /Fl"Project.lst" /I "c:\Irvine" /W3 /errorReport:prompt  /TaTemplate.asm" exited with code 1.
+  Project.vcxproj -> C:\CS271\Project 5\Debug\Project.exe
