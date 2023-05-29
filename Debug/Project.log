@@ -1,3 +1,2 @@
 ﻿  Assembling Template.asm...
-Template.asm(595): warning A4006: too many arguments in macro call
   Project.vcxproj -> C:\CS271\Project 5\Debug\Project.exe

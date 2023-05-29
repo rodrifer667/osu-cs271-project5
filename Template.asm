@@ -245,10 +245,14 @@ _displayMedian:
 
 _displayFrequencies:
 	PUSH	OFFSET randomElements
-	MOV		EAX, OFFSET randomElements
-	call	WriteDec
 	PUSH	OFFSET elFrequencies
 	call	countList
+
+_displayFreqencyArar:
+	PUSH	elFrequenciesOFFSET	
+	PUSH	11
+	call	displayArray
+
 
 ;call	testPROC
 ; 	PUSH	OFFSET elementFrequencies	
@@ -589,10 +593,17 @@ _annotateFrequency:
 	JE		_incrementCurrFrequency
 		
 	_resetCurrFrequencyCount:
-		printNum	currElFrequency
+
+		_appendElementToFreqCount:
+			PUSH EBX
+			MOV	EBX, currElFrequency
+			MOV	DWORD PTR [EDI], EBX	
+
+			POP EBX
+			ADD EDI, 4
+ 		printNum	currElFrequency
 		printSpace
-		printNum	currEl
-		setZero		currElFrequency, 0
+		setZero		currElFrequency
 		MOV		currEl, EAX
 		JMP		_continue
 	_incrementCurrFrequency:
@@ -606,8 +617,17 @@ _annotateFrequency:
 	; continue while end array not reached.
 	;---------------------------------------------------
 	CMP		ESI, lastArrayIndex
-	JL		_annotateFrequency	
+	JLE		_annotateFrequency	
 
+_appendLastElFrequency:
+
+			PUSH EBX
+			MOV	EBX, currElFrequency
+			MOV	DWORD PTR [EDI], EBX
+			POP	EBX
+
+
+	printNum	currElFrequency	
 	
 _finish:
 	POP		EBP
