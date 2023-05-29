@@ -157,7 +157,13 @@ medianElement			DWORD		?
 
 ; countList		
 elementFrequencies		DWORD		ARRAYSIZE DUP(?)
-	
+elFrequenciesLength		DWORD		?
+elFrequenciesOFFSET		DWORD		?
+currElFrequencies		DWORD		1
+currIndex				DWORD		1
+currEl					DWORD		?
+
+
 .code
 main PROC
 
@@ -186,7 +192,12 @@ _displayMedian:
 _displayFrequencies:
 	PUSH	OFFSET randomElements
 	PUSH	OFFSET elementFrequencies	
-	call	countList	
+	call	countList
+
+;call	testPROC
+; 	PUSH	OFFSET elementFrequencies	
+; 	MOV		EBX, OFFSET elementFrequencies
+;	call	countList	
 
 
 	Invoke ExitProcess,0	; exit to operating system
@@ -495,26 +506,38 @@ RET 8
 displayMedian ENDP
 
 countList PROC
+_accessBasePointer:
 	PUSH	ESP
 	PUSH	EBP
 	MOV		EBP, [ESP]
 
-	MOV		EDX, [EBP+12]							; EDX = OFFSET elementFrequencies
-	MOV		EBX, [EBP+16]							; EBX = OFFSET randomElements
-  .data
-	elementFrequenciesOFFSET		DWORD	EDX
-	currentElement					DWORD	[EBX]	
-	currentElementFrequency			DWORD	1
-	currentIndex					DWORD	1
+_initializeVariables:
+	MOV		EDX, [EBP+12]							
+	MOV		EBX, [EBP+16]		
+	MOV		elFrequenciesOFFSET, EDX
+	MOV		randomElementsOFFSET, EBX 	
 
-  .code
+	MOV		EAX, elFrequenciesOFFSET
+	call	writeDec
+	call	crlf
 
-	MOV		ECX, ARRAYSIZE
+	MOV		EAX, currEl
+	call	WriteDec
+	call	crlf
+		
+;-------------------------------------------------------
+; iterate throug the random array to count the array frequencies.
+;-------------------------------------------------------
+;	MOV		ECX, ARRAYSIZE
 _annotateFrequency:
-			
-
-	LOOP	_annotateFrequency
-
+;	MOV		EAX, elFrequenciesOFFSET	
+; 	call	WriteDec
+;	LOOP	_annotateFrequency
+	
+_finish:
+	POP		EBP
+	POP		ESP
 RET 8	
 countList ENDP
+
 END main

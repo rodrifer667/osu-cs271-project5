@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 #Program Template     (template.asm			     Page 1 - 1
 
 
@@ -198,7 +198,13 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
  000003A7  000000C8 [		elementFrequencies		DWORD		ARRAYSIZE DUP(?)
 	    00000000
 	   ]
-					
+ 000006C7 00000000		elFrequenciesLength		DWORD		?
+ 000006CB 00000000		elFrequenciesOFFSET		DWORD		?
+ 000006CF 00000001		currElFrequencies		DWORD		1
+ 000006D3 00000001		currIndex				DWORD		1
+ 000006D7 00000000		currEl					DWORD		?
+
+
  00000000			.code
  00000000			main PROC
 
@@ -227,7 +233,12 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
  0000003C			_displayFrequencies:
  0000003C  68 0000006B R		PUSH	OFFSET randomElements
  00000041  68 000003A7 R		PUSH	OFFSET elementFrequencies	
- 00000046  E8 00000166			call	countList	
+ 00000046  E8 00000166			call	countList
+
+				;call	testPROC
+				; 	PUSH	OFFSET elementFrequencies	
+				; 	MOV		EBX, OFFSET elementFrequencies
+				;	call	countList	
 
 
 					Invoke ExitProcess,0	; exit to operating system
@@ -530,8 +541,8 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
  00000193  A3 000003A3 R		MOV		medianElement, EAX
 
 					printMedian medianElement
- 000006C7		     1		  .data
- 000006C7 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
+ 000006DB		     1		  .data
+ 000006DB 54 68 65 20 6D     1		MedianMessage		BYTE	"The median value of the array: ", 0	
 	   65 64 69 61 6E
 	   20 76 61 6C 75
 	   65 20 6F 66 20
@@ -540,7 +551,7 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
 	   20 00
  00000198		     1	      .code
  00000198		     1	_printMedianMessage:
- 00000198  BA 000006C7 R     1		MOV		EDX, OFFSET MedianMessage
+ 00000198  BA 000006DB R     1		MOV		EDX, OFFSET MedianMessage
  0000019D  E8 00000000 E     1		call	WriteString
  000001A2		     1	_printMedian:
  000001A2  A1 000003A3 R     1		MOV		EAX, medianElement
@@ -554,32 +565,43 @@ Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
  000001B1			displayMedian ENDP
 
  000001B1			countList PROC
+ 000001B1			_accessBasePointer:
  000001B1  54				PUSH	ESP
  000001B2  55				PUSH	EBP
  000001B3  8B 2C 24			MOV		EBP, [ESP]
 
- 000001B6  8B 55 0C			MOV		EDX, [EBP+12]							; EDX = OFFSET elementFrequencies
- 000001B9  8B 5D 10			MOV		EBX, [EBP+16]							; EBX = OFFSET randomElements
- 000006E7			  .data
- 000006E7				elementFrequenciesOFFSET		DWORD	EDX
-Template.asm(505) : error A2138:invalid data initializer
- 000006EB				currentElement					DWORD	[EBX]	
-Template.asm(506) : error A2032:invalid use of register
- 000006EF 00000001			currentElementFrequency			DWORD	1
- 000006F3 00000001			currentIndex					DWORD	1
+ 000001B6			_initializeVariables:
+ 000001B6  8B 55 0C			MOV		EDX, [EBP+12]							
+ 000001B9  8B 5D 10			MOV		EBX, [EBP+16]		
+ 000001BC  89 15 000006CB R		MOV		elFrequenciesOFFSET, EDX
+					MOV		randomElementsOFFSET, EBX 	
+Template.asm(518) : error A2006:undefined symbol : randomElementsOFFSET
 
- 000001BC			  .code
+ 000001C2  A1 000006CB R		MOV		EAX, elFrequenciesOFFSET
+ 000001C7  E8 00000000 E		call	writeDec
+ 000001CC  E8 00000000 E		call	crlf
 
- 000001BC  B9 000000C8			MOV		ECX, ARRAYSIZE
- 000001C1			_annotateFrequency:
-							
+ 000001D1  A1 000006D7 R		MOV		EAX, currEl
+ 000001D6  E8 00000000 E		call	WriteDec
+ 000001DB  E8 00000000 E		call	crlf
+						
+				;-------------------------------------------------------
+				; iterate throug the random array to count the array frequencies.
+				;-------------------------------------------------------
+				;	MOV		ECX, ARRAYSIZE
+ 000001EB			_annotateFrequency:
+				;	MOV		EAX, elFrequenciesOFFSET	
+				; 	call	WriteDec
+				;	LOOP	_annotateFrequency
+					
+ 000001EB			_finish:
+ 000001EB  5D				POP		EBP
+ 000001EC  5C				POP		ESP
+ 000001ED  C2 0008		RET 8	
+ 000001F0			countList ENDP
 
- 000001C1  E2 FE			LOOP	_annotateFrequency
-
- 000001C3  C2 0008		RET 8	
- 000001C6			countList ENDP
 				END main
-Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 17:56:25
+Microsoft (R) Macro Assembler Version 14.29.30148.0	    05/28/23 18:45:08
 #Program Template     (template.asm			     Symbols 2 - 1
 
 
@@ -684,8 +706,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000006F7 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001C6 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000006FB Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000001F0 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -792,8 +814,11 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-countList  . . . . . . . . . . .	P Near	 000001B1 _TEXT	Length= 00000015 Public STDCALL
-  _annotateFrequency . . . . . .	L Near	 000001C1 _TEXT	
+countList  . . . . . . . . . . .	P Near	 000001B1 _TEXT	Length= 0000003F Public STDCALL
+  _accessBasePointer . . . . . .	L Near	 000001B1 _TEXT	
+  _initializeVariables . . . . .	L Near	 000001B6 _TEXT	
+  _annotateFrequency . . . . . .	L Near	 000001EB _TEXT	
+  _finish  . . . . . . . . . . .	L Near	 000001EB _TEXT	
 displayArray . . . . . . . . . .	P Near	 000000F0 _TEXT	Length= 0000005A Public STDCALL
   _loadArrayRequirements . . . .	L Near	 000000F4 _TEXT	
   _printIteratively  . . . . . .	L Near	 0000010A _TEXT	
@@ -954,7 +979,7 @@ MB_YESNOCANCEL . . . . . . . . .	Number	 00000003h
 MB_YESNO . . . . . . . . . . . .	Number	 00000004h   
 MENU_EVENT . . . . . . . . . . .	Number	 00000008h   
 MOUSE_EVENT  . . . . . . . . . .	Number	 00000002h   
-MedianMessage  . . . . . . . . .	Byte	 000006C7 _DATA	
+MedianMessage  . . . . . . . . .	Byte	 000006DB _DATA	
 MessageBox . . . . . . . . . . .	Text   	 MessageBoxA
 NULL . . . . . . . . . . . . . .	Number	 00000000h   
 NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
@@ -1060,12 +1085,13 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-currentElementFrequency  . . . .	DWord	 000006EF _DATA	
-currentElement . . . . . . . . .	DWord	 000006EB _DATA	
-currentIndex . . . . . . . . . .	DWord	 000006F3 _DATA	
+currElFrequencies  . . . . . . .	DWord	 000006CF _DATA	
+currEl . . . . . . . . . . . . .	DWord	 000006D7 _DATA	
+currIndex  . . . . . . . . . . .	DWord	 000006D3 _DATA	
 currentRowLength . . . . . . . .	DWord	 00000063 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
-elementFrequenciesOFFSET . . . .	DWord	 000006E7 _DATA	
+elFrequenciesLength  . . . . . .	DWord	 000006C7 _DATA	
+elFrequenciesOFFSET  . . . . . .	DWord	 000006CB _DATA	
 elementFrequencies . . . . . . .	DWord	 000003A7 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
@@ -1101,4 +1127,4 @@ yellow . . . . . . . . . . . . .	Number	 0000000Eh
 yes  . . . . . . . . . . . . . .	Byte	 0000004B _DATA	
 
 	   0 Warnings
-	   2 Errors
+	   1 Errors
