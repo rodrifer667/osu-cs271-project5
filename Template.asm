@@ -9,33 +9,6 @@ TITLE Program Template     (template.asm)
 
 INCLUDE Irvine32.inc
 
-printNum MACRO num
-	PUSH	EAX
-	MOV		EAX, num
-	call	WriteDec	
-	POP		EAX 
-
-ENDM
-
-;-----------------------------------------------------------------
-; Name: sourceElToEAX 
-; 
-; Moves element held in the first index of random array into EAX
-; 
-; Preconditions: NA
-;
-; recieves: NA
-
-; returns: currEl
-;-----------------------------------------------------------------
-
-sourceElementToEAX MACRO median
-	MOV		EAX, [ESI]
-	MOV		currEl, EAX
-
-ENDM
-
-
 ; MACROS
 
 ;-----------------------------------------------------------------
@@ -66,18 +39,6 @@ _printMedian:
 	call	CrlF
 
 ENDM
-
-printTestArray MACRO
-	PUSHAD
-
-	PUSH	ARRAYSIZE
-	PUSH	OFFSET testArray
-	call	displayArray	
-	call	CrlF
-
-	POPAD
-ENDM
-
 
 ;-----------------------------------------------------------------
 ; Name: setZero
@@ -116,9 +77,10 @@ ENDM
 
 printElement MACRO element
 
+_printElementAndSpace:
 	MOV		EAX, element
 	call	WriteDec	
-
+	
 	MOV		EDX, OFFSET space
 	call	Writestring
 
@@ -144,25 +106,6 @@ printSpace MACRO
 	MOV		EDX, OFFSET space
 	call	Writestring
 	POP		EDX
-
-ENDM
-
-
-
-printSortedArray MACRO inputArray
-
-	ARRAYSIZE = 200
-
-	.data
-	 inputArray DWORD randomElements
-		
-	.code
-		PUSH	OFFSET randomElements
-		call	gnomeSort
-
-		PUSH	OFFSET randomElements
-		PUSH	ARRAYSIZE
-		call	displayArray
 
 ENDM
 
@@ -286,36 +229,13 @@ main ENDP
 ; (insert additional procedures here)
 
 ; ---------------------------------------------------------------------------------
-; Name: procedureName
+; Name: introduction
 ;
-; Description:
+; Description: displays introduction.
 ;
-; Preconditions:
+; Preconditions: appropritate variables are defined in .data. 
 ;
-; Postconditions:
-;
-; Returns:
-;
-; ---------------------------------------------------------------------------------
-
-testProc PROC
-
-_displayFrequencies:
-	PUSH	OFFSET randomElements
-	PUSH	OFFSET counts
-	call	countList
-
-RET
-testPROC ENDP
-
-; ---------------------------------------------------------------------------------
-; Name: procedureName
-;
-; Description:
-;
-; Preconditions:
-;
-; Postconditions:
+; Postconditions: registers are modified EDX 
 ;
 ; Returns:
 ;
@@ -343,7 +263,7 @@ introduction ENDP
 ;
 ; Preconditions: OFFSET inputArray is pushed the runtime stack.
 ;
-; Postconditions: 
+; Postconditions: appropriate variables are defined in .data. EAX  and EBX are modified. 
 ;
 ; Returns:
 ;
@@ -439,7 +359,7 @@ gnomeSort ENDP
 ;
 ; Postconditions: EAX is modified; new array holds values
 ;
-; Returns:
+; Returns: randomElements (DWORD array)
 ;
 ; ---------------------------------------------------------------------------------
 
@@ -496,28 +416,23 @@ _loadArrayRequirements:
 	MOV		EDX, 1
 	MOV		currentRowLength, EDX
 
-		
-			
 _printIteratively:	
 
 	PUSHAD
+	_printESIElement:
+		MOV		EAX, [ESI]	
+		call	WriteDec	
 
-	MOV		EAX, [ESI]
-	call	WriteDec	
-
-	MOV		EDX, OFFSET space
-	call	Writestring
-	
+		MOV		EDX, OFFSET space
+		call	Writestring
 	POPAD
 
+	_incrementESI:
+		ADD		ESI, 4
 
-
-
-
-
-; 	printElement [ESI]	
-	ADD		ESI, 4
-	
+;--------------
+; create new line if 20 elements already printed. 
+;---------------
 	_createNewLineConditionally:
 		INC		currentRowLength
 		CMP		EBX, currentRowLength 
@@ -527,7 +442,6 @@ _printIteratively:
 		MOV		EDX, 1
 		MOV		currentRowLength, EDX
 
-	
 	_loopPrint:
 	LOOP	_printIteratively
 
@@ -593,19 +507,22 @@ _divideARRAYSIZEbyTwoFlored:
 ;----------------------------------------------------------
 ; medianElement = floor(ARRAYSIZE/2) + 4*originalArrayOFFSET
 ;----------------------------------------------------------
-	MOV		EAX, ARRAYSIZE
-	MOV		EDX, 0
-	MOV		EBX, 2
-	DIV		EBX
+	_calculateFloorDivision:
+		MOV		EAX, ARRAYSIZE
+		MOV		EDX, 0
+		MOV		EBX, 2
+		DIV		EBX
 	
-	MOV		EBX, 4
-	MUL		EBX
-	ADD		EAX, originalArrayOFFSET
+	_OFFSET_to_ArrayAddress:
+		MOV		EBX, 4
+		MUL		EBX
+		ADD		EAX, originalArrayOFFSET
 	
-	MOV		EAX, [EAX]
-	MOV		medianElement, EAX
+		MOV		EAX, [EAX]
 
-	printMedian medianElement
+	_printMedianElement:
+		MOV		medianElement, EAX
+		printMedian medianElement
 
 _finsh:
 	POP		EBP
@@ -628,16 +545,15 @@ _accessBasePointer:
 _initializeVariables:
 	MOV		EDI, [EBP+12]							
 	MOV		ESI, [EBP+16]	
-	MOV		elFrequenciesOFFSET, EDI
-	MOV		randomElOFFSET, ESI 	
 	MOV		currElFrequency, 0
 
 	MOV		EAX, [ESI]
 	ADD		ESI, 4
 
 
-	MOV		EBX, [ESI]
-	MOV		currEl, EBX
+	_initializeCurrentElement:
+		MOV		EBX, [ESI]
+		MOV		currEl, EBX
 	
 ;-------------------------------------------------------
 ; iterate throug the random array to count the array frequencies.
