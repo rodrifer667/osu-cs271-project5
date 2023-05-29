@@ -11,6 +11,34 @@ INCLUDE Irvine32.inc
 
 ; MACROS
 
+;-----------------------------------------------------------------
+; Name: printElement 
+; 
+; prints the element along with a space.
+; 
+; Preconditions: address of index is passed as an argument.
+;
+; recieves
+; median = median element 
+
+; returns: NA
+;-----------------------------------------------------------------
+
+printMedian MACRO median
+	  .data
+	MedianMessage		BYTE	"The median value of the array: ", 0	
+      .code
+
+_printMedianMessage:
+	MOV		EDX, OFFSET MedianMessage
+	call	WriteString
+
+_printMedian:
+	MOV		EAX, median
+	call	WriteDec
+
+ENDM
+
 printTestArray MACRO
 	PUSHAD
 
@@ -68,6 +96,23 @@ printSpace MACRO
 
 ENDM
 
+printSortedArray MACRO inputArray
+
+	ARRAYSIZE = 200
+
+	.data
+	 inputArray DWORD randomElements
+		
+	.code
+		PUSH	OFFSET randomElements
+		call	gnomeSort
+
+		PUSH	OFFSET randomElements
+		PUSH	ARRAYSIZE
+		call	displayArray
+
+ENDM
+
 ROW_LENGTH = 20
 
 ; fillArray PROC
@@ -106,13 +151,43 @@ tempValue				DWORD		?
 originalArrayOFFSET		DWORD		?
 lastArrayIndex			DWORD		?
 
+; displayMedian	
+medianOFFSET			DWORD		?
+medianElement			DWORD		? 
+
+; countList		
+elementFrequencies		DWORD		ARRAYSIZE DUP(?)
 	
 .code
 main PROC
 
+_getRandomArray:
 	call	Randomize
 	call	fillArray
-	call	testPROC
+	
+_displayRandomArray:
+	PUSH	OFFSET randomElements
+	PUSH	ARRAYSIZE
+	call	displayArray
+
+_sortRandomArray:
+	PUSH	OFFSET randomElements
+	call	gnomeSort
+
+_displaySortedArray:	
+	PUSH	OFFSET randomElements
+	PUSH	ARRAYSIZE
+	call	displayArray
+
+_displayMedian:
+ 	PUSH	OFFSET randomElements
+	call	displayMedian
+
+_displayFrequencies:
+	PUSH	OFFSET randomElements
+	PUSH	OFFSET elementFrequencies	
+	call	countList	
+
 
 	Invoke ExitProcess,0	; exit to operating system
 main ENDP
@@ -134,20 +209,23 @@ main ENDP
 
 testProc PROC
 
-
 	PUSH	OFFSET randomElements
 	call	gnomeSort
 
+
 	PUSH	OFFSET randomElements
 	PUSH	ARRAYSIZE
-	call	displayArray
-	
+	call	displayMedian 	
+
+	PUSH	OFFSET randomElements
+	PUSH	OFFSET elementFrequencies	
+	call	countList	
+
 RET
 testPROC ENDP
 
 ; ---------------------------------------------------------------------------------
-; Name: gnomeSort
-;
+
 ; Description: implement gnome sorting algorithm.
 ;
 ; Preconditions: OFFSET inputArray is pushed the runtime stack.
@@ -375,4 +453,56 @@ _useTemptsToSwitchElements:
 RET	8
 exchangeElements ENDP
 
+; ---------------------------------------------------------------------------------
+; Name: displayMedian
+;
+; Description: prints the median.
+;
+; Preconditions: the desired arra OFFSET is pushed on to the stack. median is declared
+; in the .data segment.
+;
+; Postconditions:  
+;
+; Returns: NA
+;
+; ---------------------------------------------------------------------------------
+
+displayMedian PROC
+	PUSH	ESP
+	PUSH	EBP
+	MOV		EBP, ESP
+	MOV		EBX, [ESP+12]
+
+	MOV		originalArrayOFFSET, EBX
+
+_divideARRAYSIZEbyTwoFlored:
+
+;----------------------------------------------------------
+; medianElement = floor(ARRAYSIZE/2) + 4*originalArrayOFFSET
+;----------------------------------------------------------
+	MOV		EAX, ARRAYSIZE
+	MOV		EDX, 0
+	MOV		EBX, 2
+	DIV		EBX
+	
+	MOV		EBX, 4
+	MUL		EBX
+	ADD		EAX, originalArrayOFFSET
+	
+	MOV		EAX, [EAX]
+	MOV		medianElement, EAX
+
+	printMedian medianElement
+
+
+_finsh:
+	POP		EBP
+	POP		ESP
+RET 8
+displayMedian ENDP
+
+countList PROC
+	
+RET 8	
+countList ENDP
 END main
