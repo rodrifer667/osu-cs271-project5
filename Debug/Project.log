@@ -1,2 +1,4 @@
 ﻿  Assembling Template.asm...
-  Project.vcxproj -> C:\CS271\Project 5\Debug\Project.exe
+Template.asm(505): error A2138: invalid data initializer
+Template.asm(506): error A2032: invalid use of register
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations\masm.targets(70,5): error MSB3721: The command "ml.exe /c /nologo /Sg /Zi /Fo"Debug\Template.obj" /Fl"Project.lst" /I "c:\Irvine" /W3 /errorReport:prompt  /TaTemplate.asm" exited with code 1.

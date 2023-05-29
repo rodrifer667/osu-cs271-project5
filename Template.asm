@@ -209,17 +209,10 @@ main ENDP
 
 testProc PROC
 
-	PUSH	OFFSET randomElements
-	call	gnomeSort
-
-
-	PUSH	OFFSET randomElements
-	PUSH	ARRAYSIZE
-	call	displayMedian 	
-
+_displayFrequencies:
 	PUSH	OFFSET randomElements
 	PUSH	OFFSET elementFrequencies	
-	call	countList	
+	call	countList
 
 RET
 testPROC ENDP
@@ -502,7 +495,26 @@ RET 8
 displayMedian ENDP
 
 countList PROC
-	
+	PUSH	ESP
+	PUSH	EBP
+	MOV		EBP, [ESP]
+
+	MOV		EDX, [EBP+12]							; EDX = OFFSET elementFrequencies
+	MOV		EBX, [EBP+16]							; EBX = OFFSET randomElements
+  .data
+	elementFrequenciesOFFSET		DWORD	EDX
+	currentElement					DWORD	[EBX]	
+	currentElementFrequency			DWORD	1
+	currentIndex					DWORD	1
+
+  .code
+
+	MOV		ECX, ARRAYSIZE
+_annotateFrequency:
+			
+
+	LOOP	_annotateFrequency
+
 RET 8	
 countList ENDP
 END main
